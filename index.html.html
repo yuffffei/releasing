@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="ocean">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="释放">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0D1E2A" id="theme-color-meta">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="./icon-512.png">
+<title>释放 · Release</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ══════════════════════════════════════
+   OCEAN THEME — clean white, subtle water
+══════════════════════════════════════ */
+[data-theme="ocean"] {
+  --bg-base:       #F0F7FA;
+  --bg-surface:    rgba(255,255,255,0.94);
+  --bg-surface2:   rgba(238,248,252,0.9);
+  --bg-float:      rgba(255,255,255,0.97);
+
+  --text-primary:  #1C2E38;
+  --text-mid:      #3E5A68;
+  --text-soft:     #7498A8;
+  --text-hint:     #A8C4CE;
+
+  --accent:        #3A8FA3;
+  --accent-light:  rgba(210,238,246,0.85);
+  --accent-mid:    rgba(140,200,218,0.5);
+  --accent-dark:   #1F6880;
+
+  --warm:          rgba(247,240,230,0.92);
+  --warm-mid:      rgba(225,205,178,0.6);
+  --warm-text:     #7A4F30;
+
+  --purple:        #6B82B0;
+  --purple-light:  rgba(225,230,248,0.88);
+  --purple-mid:    rgba(180,195,228,0.5);
+
+  --red-light:     rgba(253,240,240,0.9);
+  --red-mid:       rgba(235,190,190,0.6);
+  --red:           #C47070;
+
+  --border:        rgba(26,60,80,0.08);
+  --border2:       rgba(26,60,80,0.04);
+  --shadow:        0 2px 14px rgba(40,100,130,0.07);
+  --shadow-lg:     0 8px 28px rgba(40,100,130,0.11);
+
+  --radius:        22px;
+  --radius-sm:     15px;
+
+  --theme-toggle-bg: rgba(210,238,246,0.8);
+}
+
+/* ══════════════════════════════════════
+   NIGHT THEME — starfield neon, clean dark
+══════════════════════════════════════ */
+[data-theme="night"] {
+  --bg-base:       #0D1117;
+  --bg-surface:    #161C24;
+  --bg-surface2:   #1E2630;
+  --bg-float:      rgba(22,28,36,0.90);
+
+  --text-primary:  #E8EEF2;
+  --text-mid:      #9BB0BF;
+  --text-soft:     #5C7A8A;
+  --text-hint:     #354A57;
+
+  --accent:        #4FC3D8;
+  --accent-light:  rgba(79,195,216,0.12);
+  --accent-mid:    rgba(79,195,216,0.3);
+  --accent-dark:   #7ED9E8;
+
+  --warm:          rgba(255,180,100,0.1);
+  --warm-mid:      rgba(255,180,100,0.25);
+  --warm-text:     #FFB464;
+
+  --purple:        #A78BDB;
+  --purple-light:  rgba(167,139,219,0.12);
+  --purple-mid:    rgba(167,139,219,0.3);
+
+  --red-light:     rgba(220,100,100,0.1);
+  --red-mid:       rgba(220,100,100,0.25);
+  --red:           #E07878;
+
+  --border:        rgba(79,195,216,0.12);
+  --border2:       rgba(79,195,216,0.06);
+  --shadow:        0 2px 16px rgba(0,0,0,0.4);
+  --shadow-lg:     0 8px 40px rgba(0,0,0,0.5);
+
+  --radius:        22px;
+  --radius-sm:     15px;
+
+  --deco-a: rgba(79,195,216,0.15);
+  --deco-b: rgba(167,139,219,0.12);
+  --deco-c: rgba(79,195,216,0.06);
+
+  --theme-toggle-bg: var(--accent-light);
+  --theme-toggle-icon: '✦';
+}
+
+/* ══════════════════════════════════════
+   BASE STYLES
+══════════════════════════════════════ */
+html,body{
+  height:100%;
+  background:#F0F7FA;
+  font-family:'DM Sans',sans-serif;
+  color:var(--text-primary);
+  overscroll-behavior:none;
+  -webkit-font-smoothing:antialiased;
+  transition:background .5s,color .4s;
+}
+html[data-theme="night"],
+html[data-theme="night"] body{background:#0D1117;}
+html[data-theme="ocean"],
+html[data-theme="ocean"] body{background:#F0F7FA;}
+
+#app{
+  display:flex;flex-direction:column;
+  height:100dvh;max-width:430px;margin:0 auto;
+  position:relative;overflow:hidden;
+  background:transparent;
+}
+
+/* ── Background deco ── */
+.bg-deco{
+  position:fixed;top:0;left:50%;transform:translateX(-50%);
+  width:430px;height:100dvh;pointer-events:none;z-index:0;overflow:hidden;
+}
+[data-theme="ocean"] .bg-deco{background:transparent;}
+[data-theme="night"] .bg-deco{background:transparent;}
+.stars{position:absolute;inset:0;}
+[data-theme="ocean"] #stars-container{display:none;}
+#ocean-canvas{position:absolute;inset:0;width:100%;height:100%;}
+[data-theme="ocean"] #ocean-canvas{display:block;}
+[data-theme="night"] #ocean-canvas{display:none;}
+
+/* ── Header ── */
+.header{
+  padding:50px 22px 14px;flex-shrink:0;position:relative;z-index:2;
+}
+.header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;}
+.logo{
+  font-family:'Cormorant Garamond',serif;
+  font-size:28px;font-weight:300;letter-spacing:-.5px;
+  color:var(--text-primary);line-height:1;
+}
+.logo em{font-style:italic;color:var(--accent);}
+
+.header-right{display:flex;align-items:center;gap:8px;}
+
+/* Theme toggle */
+.theme-btn{
+  width:38px;height:38px;border-radius:12px;
+  background:var(--theme-toggle-bg);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:16px;transition:all .3s;
+  flex-shrink:0;
+}
+.theme-btn:active{transform:scale(.93);}
+
+/* Nav tabs */
+.nav-tabs{
+  display:flex;background:var(--bg-surface2);
+  border-radius:13px;padding:3px;gap:2px;
+  border:1px solid var(--border);
+}
+.nav-btn{
+  font-size:11.5px;font-weight:500;
+  padding:6px 11px;border-radius:10px;border:none;
+  background:transparent;color:var(--text-soft);
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+  font-family:'DM Sans',sans-serif;
+}
+.nav-btn.active{
+  background:var(--bg-surface);color:var(--text-primary);
+  box-shadow:var(--shadow);
+}
+.tagline{font-size:11.5px;color:var(--text-soft);letter-spacing:.02em;}
+
+/* ── Screens ── */
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden;position:relative;z-index:1;}
+.screen.active{display:flex;}
+.scroll{flex:1;overflow-y:auto;padding:6px 18px 110px;-webkit-overflow-scrolling:touch;}
+.scroll::-webkit-scrollbar{display:none;}
+
+/* ── Cards ── */
+.card{
+  background:var(--bg-surface);
+  border-radius:var(--radius);
+  padding:20px 18px;margin-bottom:10px;
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  transition:background .4s,border-color .4s,box-shadow .4s;
+}
+.card-label{
+  font-size:10px;font-weight:500;color:var(--text-soft);
+  letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;
+}
+.card-title{
+  font-family:'Cormorant Garamond',serif;font-weight:400;
+  font-size:22px;color:var(--text-primary);
+  margin-bottom:9px;line-height:1.3;
+}
+.card-body{font-size:13.5px;color:var(--text-mid);line-height:1.78;}
+
+/* Accent cards */
+.card-accent{
+  background:var(--accent-light);border-color:var(--accent-mid);
+}
+.card-accent .card-body,.card-accent .card-title{color:var(--accent-dark);}
+[data-theme="night"] .card-accent .card-body,[data-theme="night"] .card-accent .card-title{color:var(--accent-dark);}
+
+.card-warm{background:var(--warm);border-color:var(--warm-mid);}
+.card-warm .card-body{color:var(--warm-text);}
+
+.card-purple{background:var(--purple-light);border-color:var(--purple-mid);}
+.card-purple .card-body,.card-purple .card-title{color:var(--purple);}
+
+.card-red{background:var(--red-light);border-color:var(--red-mid);}
+.card-red .card-body{color:var(--red);}
+
+/* ── Progress ── */
+.progress-bar{display:flex;gap:5px;align-items:center;margin-bottom:16px;}
+.dot{width:6px;height:6px;border-radius:3px;background:var(--border);transition:all .35s;}
+.dot.done{background:var(--accent);width:20px;}
+.dot.active{background:var(--accent-mid);width:12px;}
+
+/* ── Mode cards ── */
+.mode-cards{display:flex;flex-direction:column;gap:10px;}
+.mode-card{
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:18px 16px;
+  cursor:pointer;text-align:left;transition:all .22s;
+  box-shadow:var(--shadow);
+  display:flex;align-items:flex-start;gap:14px;
+}
+.mode-card:active{transform:scale(.985);}
+[data-theme="ocean"] .mode-card:hover{border-color:var(--accent-mid);box-shadow:var(--shadow-lg);}
+[data-theme="night"] .mode-card:hover{border-color:var(--accent);}
+.mode-card-icon{font-size:28px;flex-shrink:0;margin-top:2px;}
+.mode-card-title{font-size:15px;font-weight:500;color:var(--text-primary);margin-bottom:4px;}
+.mode-card-desc{font-size:12.5px;color:var(--text-soft);line-height:1.55;}
+
+/* ── Emotion grid ── */
+.emo-list{display:flex;flex-direction:column;gap:6px;margin-top:6px;}
+.emo-btn{
+  background:var(--bg-surface2);border:1.5px solid transparent;
+  border-radius:var(--radius-sm);padding:13px 15px;
+  cursor:pointer;text-align:left;transition:all .18s;
+  display:flex;align-items:center;gap:12px;
+}
+.emo-btn:active{transform:scale(.99);}
+.emo-btn.sel{background:var(--accent-light);border-color:var(--accent);}
+.emo-level{
+  font-size:10px;font-weight:500;color:var(--text-hint);
+  letter-spacing:.06em;width:16px;text-align:right;flex-shrink:0;
+}
+.emo-btn.sel .emo-level{color:var(--accent-mid);}
+.emo-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;
+  background:var(--dot-color,var(--text-hint));opacity:.5;
+  transition:opacity .18s;
+}
+.emo-btn.sel .emo-dot{opacity:1;}
+.emo-info{flex:1;}
+.emo-name{font-size:14px;font-weight:500;color:var(--text-primary);}
+.emo-sub{font-size:12px;color:var(--text-soft);margin-top:2px;line-height:1.4;}
+
+/* ── Q & A ── */
+.q-text{
+  font-family:'Cormorant Garamond',serif;font-weight:300;font-style:italic;
+  font-size:20px;color:var(--text-primary);
+  line-height:1.45;margin-bottom:16px;
+}
+.ans-col{display:flex;flex-direction:column;gap:8px;}
+.ans-btn{
+  padding:13px 16px;border-radius:var(--radius-sm);
+  border:1px solid var(--border);
+  background:var(--bg-surface2);color:var(--text-primary);
+  font-size:13.5px;font-family:'DM Sans',sans-serif;
+  cursor:pointer;text-align:left;transition:all .18s;line-height:1.4;
+}
+.ans-btn:active{transform:scale(.98);}
+.ans-btn.yes{background:var(--accent-light);border-color:var(--accent);color:var(--accent-dark);}
+.ans-btn.soft{background:var(--warm);border-color:var(--warm-mid);color:var(--warm-text);}
+
+/* ── Want selector ── */
+.want-cards{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+.want-btn{
+  background:var(--bg-surface2);border:1.5px solid transparent;
+  border-radius:var(--radius-sm);padding:15px 15px;
+  cursor:pointer;text-align:left;transition:all .18s;
+}
+.want-btn:active{transform:scale(.98);}
+.want-btn.sel{background:var(--accent-light);border-color:var(--accent);}
+.want-title{font-size:14px;font-weight:500;color:var(--text-primary);margin-bottom:3px;}
+.want-desc{font-size:12px;color:var(--text-soft);line-height:1.5;}
+
+/* ── Buttons ── */
+.btn-primary{
+  display:block;width:100%;padding:15px;
+  border-radius:var(--radius-sm);
+  background:var(--accent);color:#fff;
+  font-size:14px;font-weight:500;border:none;
+  cursor:pointer;text-align:center;
+  transition:all .18s;font-family:'DM Sans',sans-serif;
+  margin-bottom:8px;letter-spacing:.01em;
+  box-shadow:0 4px 14px rgba(58,143,163,.25);
+}
+[data-theme="night"] .btn-primary{box-shadow:0 4px 20px rgba(79,195,216,.2);}
+.btn-primary:active{transform:scale(.98);opacity:.9;}
+.btn-primary.dark{background:var(--text-primary);box-shadow:none;}
+.btn-primary.purple{background:var(--purple);box-shadow:0 4px 14px rgba(107,130,176,.25);}
+.btn-primary.amber-btn{background:#C8853A;box-shadow:0 4px 14px rgba(200,133,58,.25);}
+.btn-secondary{
+  display:block;width:100%;padding:13px;
+  border-radius:var(--radius-sm);background:transparent;
+  color:var(--text-soft);font-size:13.5px;
+  border:1px solid var(--border);cursor:pointer;
+  text-align:center;font-family:'DM Sans',sans-serif;
+  transition:all .18s;margin-bottom:8px;
+}
+.btn-secondary:active{background:var(--bg-surface2);}
+
+/* ── Text inputs ── */
+.text-input{
+  width:100%;border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);padding:13px 14px;
+  font-size:14px;font-family:'DM Sans',sans-serif;
+  color:var(--text-primary);background:var(--bg-surface2);
+  resize:none;outline:none;line-height:1.6;
+  min-height:72px;margin-bottom:12px;
+  transition:border-color .2s,background .4s;
+}
+.text-input:focus{border-color:var(--accent);background:var(--bg-surface);}
+.text-input::placeholder{color:var(--text-hint);}
+
+/* ── Breath ── */
+.breath-wrap{display:flex;flex-direction:column;align-items:center;padding:20px 0 10px;}
+.breath-ring{
+  width:120px;height:120px;border-radius:50%;
+  background:var(--accent-light);
+  border:1.5px solid var(--accent-mid);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:transform .8s ease-in-out,box-shadow .8s;cursor:pointer;
+  position:relative;
+}
+[data-theme="night"] .breath-ring{
+  box-shadow:0 0 0 0 rgba(79,195,216,0);
+}
+[data-theme="night"] .breath-ring.expanding{
+  box-shadow:0 0 30px rgba(79,195,216,.25),0 0 60px rgba(79,195,216,.1);
+}
+.breath-word{
+  font-family:'Cormorant Garamond',serif;font-weight:300;
+  font-size:16px;color:var(--accent-dark);
+}
+.breath-count{font-size:11px;color:var(--accent);margin-top:2px;}
+.breath-hint{font-size:13px;color:var(--text-soft);margin-top:16px;text-align:center;min-height:20px;}
+
+/* ── Stuck bar ── */
+.stuck-bar{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:8px 18px 20px;
+  background:linear-gradient(to top,var(--bg-base) 55%,transparent);
+  z-index:10;
+}
+.stuck-btn{
+  width:100%;padding:11px;border-radius:var(--radius-sm);
+  border:1px dashed var(--red-mid);
+  background:var(--red-light);color:var(--red);
+  font-size:13px;font-family:'DM Sans',sans-serif;
+  cursor:pointer;transition:all .18s;letter-spacing:.01em;
+}
+.stuck-btn:active{transform:scale(.98);}
+
+/* ── Stuck overlay ── */
+.stuck-overlay{
+  position:absolute;inset:0;
+  background:rgba(10,16,20,.55);
+  z-index:100;display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .28s;
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+}
+.stuck-overlay.show{opacity:1;pointer-events:all;}
+.stuck-sheet{
+  background:var(--bg-base);
+  border-radius:26px 26px 0 0;
+  padding:24px 18px 40px;width:100%;max-width:430px;
+  transform:translateY(24px);transition:transform .32s cubic-bezier(.2,.8,.3,1);
+  border-top:1px solid var(--border);
+}
+.stuck-overlay.show .stuck-sheet{transform:translateY(0);}
+.stuck-sheet-title{
+  font-family:'Cormorant Garamond',serif;font-weight:400;
+  font-size:22px;color:var(--text-primary);margin-bottom:6px;
+}
+.stuck-sheet-sub{font-size:13px;color:var(--text-soft);margin-bottom:16px;line-height:1.65;}
+.stuck-textarea{
+  width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  padding:13px 14px;font-size:14px;font-family:'DM Sans',sans-serif;
+  color:var(--text-primary);background:var(--bg-surface2);
+  resize:none;outline:none;line-height:1.6;min-height:88px;margin-bottom:12px;
+  transition:border-color .2s;
+}
+.stuck-textarea:focus{border-color:var(--accent);}
+.stuck-textarea::placeholder{color:var(--text-hint);}
+
+/* ── Records ── */
+.rec-list{display:flex;flex-direction:column;gap:9px;}
+.rec-item{
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:15px 16px;
+  cursor:pointer;transition:all .18s;box-shadow:var(--shadow);
+}
+.rec-item:active{background:var(--bg-surface2);}
+.rec-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.rec-date{font-size:11px;color:var(--text-soft);}
+.rec-mode-badge{font-size:10px;font-weight:500;padding:3px 9px;border-radius:20px;}
+.badge-regular{background:var(--accent-light);color:var(--accent-dark);}
+.badge-goal{background:var(--purple-light);color:var(--purple);}
+.badge-ai{background:var(--warm);color:var(--warm-text);}
+.rec-content{font-size:13.5px;color:var(--text-primary);font-weight:500;margin-bottom:4px;line-height:1.4;}
+.rec-sub{font-size:12px;color:var(--text-soft);line-height:1.5;}
+.rec-detail{margin-top:11px;padding-top:11px;border-top:1px solid var(--border2);display:none;}
+.rec-detail.open{display:block;}
+.rec-detail-row{font-size:12.5px;color:var(--text-mid);margin-bottom:5px;line-height:1.5;}
+.rec-detail-label{color:var(--text-soft);margin-right:4px;}
+.empty-state{text-align:center;padding:52px 24px;color:var(--text-soft);}
+.empty-icon{font-size:36px;margin-bottom:12px;}
+.empty-text{font-size:14px;line-height:1.65;}
+.section-header{
+  font-size:11px;font-weight:500;color:var(--text-soft);
+  letter-spacing:.08em;text-transform:uppercase;
+  margin:18px 0 9px;padding:0 2px;
+}
+
+/* ── Completion ── */
+.completion-icon{font-size:44px;text-align:center;margin:6px 0 10px;}
+.tip-row{display:flex;align-items:flex-start;gap:11px;margin-bottom:11px;}
+.tip-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.tip-text{font-size:13px;color:var(--text-mid);line-height:1.6;}
+.tip-text strong{color:var(--text-primary);font-weight:500;}
+
+/* ── AI Chat ── */
+.chat-messages{
+  flex:1;overflow-y:auto;
+  padding:10px 16px 8px;-webkit-overflow-scrolling:touch;
+}
+.chat-messages::-webkit-scrollbar{display:none;}
+.msg{margin-bottom:10px;display:flex;flex-direction:column;}
+.msg.user{align-items:flex-end;}
+.msg.ai{align-items:flex-start;}
+.bubble{
+  max-width:82%;padding:11px 15px;border-radius:18px;
+  font-size:13.5px;line-height:1.65;
+}
+.msg.user .bubble{
+  background:var(--accent);color:#fff;
+  border-bottom-right-radius:5px;
+}
+.msg.ai .bubble{
+  background:var(--bg-surface);color:var(--text-primary);
+  border:1px solid var(--border);border-bottom-left-radius:5px;
+  box-shadow:var(--shadow);
+}
+.msg.ai .bubble.thinking{color:var(--text-soft);font-style:italic;}
+.ai-name{font-size:10.5px;color:var(--text-soft);margin-bottom:4px;padding-left:3px;letter-spacing:.04em;}
+.chat-input-wrap{
+  padding:10px 16px 26px;
+  background:var(--bg-base);border-top:1px solid var(--border);
+  flex-shrink:0;
+}
+.chat-input-row{display:flex;gap:8px;align-items:flex-end;}
+.chat-input{
+  flex:1;border:1.5px solid var(--border);border-radius:15px;
+  padding:10px 13px;font-size:14px;font-family:'DM Sans',sans-serif;
+  color:var(--text-primary);background:var(--bg-surface);
+  resize:none;outline:none;max-height:100px;line-height:1.5;
+  transition:border-color .18s;
+}
+.chat-input:focus{border-color:var(--accent);}
+.chat-input::placeholder{color:var(--text-hint);}
+.send-btn{
+  width:42px;height:42px;border-radius:12px;
+  background:var(--accent);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .18s;
+  box-shadow:0 4px 12px rgba(58,143,163,.3);
+}
+[data-theme="night"] .send-btn{box-shadow:0 4px 16px rgba(79,195,216,.2);}
+.send-btn:active{transform:scale(.93);}
+.send-btn svg{width:17px;height:17px;fill:white;}
+.send-btn:disabled{opacity:.4;box-shadow:none;}
+
+/* ocean: clean surfaces */
+[data-theme="ocean"] .stuck-bar{
+  background:linear-gradient(to top,#F0F7FA 55%,transparent);
+}
+[data-theme="night"] .btn-primary{
+  box-shadow:0 4px 20px rgba(79,195,216,.18);
+}
+[data-theme="night"] .card{
+  background:var(--bg-surface);
+  box-shadow:0 2px 20px rgba(0,0,0,.3);
+}
+[data-theme="night"] .mode-card:hover{
+  box-shadow:0 0 0 1px var(--accent),0 8px 32px rgba(79,195,216,.1);
+}
+[data-theme="night"] .nav-btn.active{
+  box-shadow:0 0 0 1px var(--accent-mid);
+}
+[data-theme="night"] .emo-btn.sel{
+  box-shadow:0 0 0 1px var(--accent);
+}
+[data-theme="night"] .want-btn.sel{
+  box-shadow:0 0 0 1px var(--accent);
+}
+[data-theme="night"] .ans-btn.yes{
+  box-shadow:0 0 0 1px var(--accent);
+}
+[data-theme="night"] .logo em{
+  text-shadow:0 0 18px rgba(79,195,216,.5);
+}
+
+/* ── Animations ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes twinkle{0%,100%{opacity:.3}50%{opacity:1}}
+.card,.mode-card,.rec-item{animation:fadeUp .28s ease both;}
+.star{position:absolute;border-radius:50%;background:white;animation:twinkle var(--dur,3s) var(--delay,0s) ease-in-out infinite;}
+
+.hidden{display:none!important;}
+
+/* ── API Key Setup ── */
+.apikey-overlay{
+  position:fixed;inset:0;z-index:200;
+  display:flex;align-items:flex-end;justify-content:center;
+  background:rgba(10,18,24,0.5);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+}
+.apikey-sheet{
+  background:var(--bg-base);border-radius:26px 26px 0 0;
+  padding:28px 22px 48px;width:100%;max-width:430px;
+  border-top:1px solid var(--border);
+}
+.apikey-logo{
+  font-family:'Cormorant Garamond',serif;font-weight:300;
+  font-size:26px;color:var(--text-primary);margin-bottom:4px;
+}
+.apikey-logo em{font-style:italic;color:var(--accent);}
+.apikey-title{font-size:14px;color:var(--text-mid);line-height:1.65;margin-bottom:20px;}
+.apikey-label{font-size:11px;font-weight:500;color:var(--text-soft);letter-spacing:.07em;text-transform:uppercase;margin-bottom:7px;}
+/* model selector */
+.model-tabs{display:flex;gap:8px;margin-bottom:18px;}
+.model-tab{
+  flex:1;padding:10px 8px;border-radius:var(--radius-sm);
+  border:1.5px solid var(--border);background:var(--bg-surface2);
+  color:var(--text-soft);font-size:13px;font-weight:500;
+  font-family:'DM Sans',sans-serif;cursor:pointer;text-align:center;
+  transition:all .18s;
+}
+.model-tab:active{transform:scale(.98);}
+.model-tab.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent-dark);}
+.model-name{font-size:13px;font-weight:500;display:block;margin-bottom:2px;}
+.model-sub{font-size:11px;opacity:.7;display:block;}
+.apikey-input{
+  width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+  padding:13px 14px;font-size:14px;font-family:'DM Sans',sans-serif;
+  color:var(--text-primary);background:var(--bg-surface2);
+  outline:none;letter-spacing:.04em;margin-bottom:8px;
+  transition:border-color .2s;
+}
+.apikey-input:focus{border-color:var(--accent);}
+.apikey-input::placeholder{color:var(--text-hint);letter-spacing:0;}
+.apikey-hint{font-size:12px;color:var(--text-soft);line-height:1.6;margin-bottom:18px;}
+.apikey-hint a{color:var(--accent);text-decoration:none;}
+.apikey-skip{font-size:12.5px;color:var(--text-soft);text-align:center;margin-top:10px;cursor:pointer;}
+.apikey-skip:hover{color:var(--text-mid);}
+/* settings in AI tab */
+.ai-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 16px 0;flex-shrink:0;
+}
+.ai-header-left{display:flex;align-items:center;gap:8px;}
+.ai-header-title{font-size:13px;font-weight:500;color:var(--text-soft);letter-spacing:.04em;}
+.ai-model-badge{
+  font-size:10px;font-weight:500;padding:3px 8px;border-radius:20px;
+  background:var(--accent-light);color:var(--accent-dark);
+}
+.ai-settings-btn{
+  font-size:12px;color:var(--text-soft);background:none;border:none;
+  cursor:pointer;padding:6px 10px;border-radius:10px;
+  transition:background .18s;font-family:'DM Sans',sans-serif;
+}
+.ai-settings-btn:hover{background:var(--bg-surface2);}
+
+/* ── Sound toggle ── */
+.sound-btn{
+  width:38px;height:38px;border-radius:12px;
+  background:var(--bg-surface2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:16px;transition:all .25s;
+  flex-shrink:0;position:relative;
+}
+.sound-btn:active{transform:scale(.93);}
+.sound-btn.on{background:var(--accent-light);border-color:var(--accent-mid);}
+.sound-btn.on::after{
+  content:'';position:absolute;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);bottom:6px;right:6px;
+}
+/* volume panel */
+.vol-panel{
+  position:absolute;top:52px;left:0;right:0;z-index:50;
+  padding:0 22px;pointer-events:none;opacity:0;
+  transition:opacity .22s;
+}
+.vol-panel.show{opacity:1;pointer-events:all;}
+.vol-card{
+  background:var(--bg-surface);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:14px 16px;
+  box-shadow:var(--shadow-lg);
+  display:flex;align-items:center;gap:12px;
+}
+.vol-icon{font-size:15px;color:var(--text-soft);flex-shrink:0;}
+.vol-slider{flex:1;accent-color:var(--accent);}
+.vol-val{font-size:12px;color:var(--text-soft);min-width:28px;text-align:right;flex-shrink:0;}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- API KEY OVERLAY -->
+<div class="apikey-overlay" id="apikey-overlay" style="display:none">
+  <div class="apikey-sheet">
+    <div class="apikey-logo">释放 <em>Release</em></div>
+    <div class="apikey-title" style="margin-top:6px">选择 AI 模型并填入对应的 API Key。</div>
+    <div class="apikey-label">选择模型</div>
+    <div class="model-tabs">
+      <div class="model-tab active" id="tab-deepseek" onclick="selectModel('deepseek')">
+        <span class="model-name">DeepSeek</span>
+        <span class="model-sub">推荐·可直连</span>
+      </div>
+      <div class="model-tab" id="tab-kimi" onclick="selectModel('kimi')">
+        <span class="model-name">Kimi</span>
+        <span class="model-sub">可直连</span>
+      </div>
+      <div class="model-tab" id="tab-claude" onclick="selectModel('claude')">
+        <span class="model-name">Claude</span>
+        <span class="model-sub">需要VPN</span>
+      </div>
+    </div>
+    <div class="apikey-label" id="key-label">DeepSeek API Key</div>
+    <input class="apikey-input" id="apikey-input" type="password" placeholder="sk-..." autocomplete="off" autocorrect="off" spellcheck="false">
+    <div class="apikey-hint" id="key-hint">
+      Key 仅保存在本地，不会上传任何地方。<br>
+      获取 Key：<a href="https://platform.deepseek.com" target="_blank" id="key-link">platform.deepseek.com</a>
+    </div>
+    <button class="btn-primary" onclick="saveApiKey()">保存并启用</button>
+    <div class="apikey-skip" onclick="skipApiKey()">暂时跳过</div>
+  </div>
+</div>
+
+<!-- BG DECO -->
+<div class="bg-deco">
+  <canvas id="ocean-canvas"></canvas>
+  <div class="stars" id="stars-container"></div>
+</div>
+
+<!-- STUCK OVERLAY -->
+<div class="stuck-overlay" id="stuck-overlay" onclick="closeStuckIfOutside(event)">
+  <div class="stuck-sheet">
+    <div class="stuck-sheet-title">释放卡住了</div>
+    <div class="stuck-sheet-sub">对于这个卡住的感觉，你脑子里浮现出什么想法？<br>不需要分析，写下第一个念头就好。</div>
+    <textarea class="stuck-textarea" id="stuck-input" placeholder="比如：我觉得我根本做不到……我不相信这有用……"></textarea>
+    <button class="btn-primary" onclick="processStuck()">对这个想法做一轮释放 →</button>
+    <button class="btn-secondary" onclick="closeStuck()">取消</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-row">
+    <div class="logo">释放 <em>Release</em></div>
+    <div class="header-right">
+      <button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="白噪音">🔇</button>
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="切换主题">🌊</button>
+      <div class="nav-tabs">
+        <button class="nav-btn active" onclick="switchTab('home')">练习</button>
+        <button class="nav-btn" onclick="switchTab('records')">记录</button>
+        <button class="nav-btn" onclick="switchTab('ai')">对话</button>
+      </div>
+    </div>
+  </div>
+  <div class="tagline">Lester Levenson · 情绪释放练习</div>
+  <div class="vol-panel" id="vol-panel">
+    <div class="vol-card">
+      <span class="vol-icon">🔉</span>
+      <input class="vol-slider" id="vol-slider" type="range" min="0" max="100" value="70" step="1" oninput="setVolume(this.value)">
+      <span class="vol-val" id="vol-val">70</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HOME ══ -->
+<div id="screen-home" class="screen active">
+  <div class="scroll">
+    <div class="card card-accent">
+      <div class="card-body">释放就是打开手掌，放下你一直握着的东西。<br>今天你想练习哪种释放？</div>
+    </div>
+    <div class="mode-cards">
+      <div class="mode-card" onclick="startMode('regular')">
+        <div class="mode-card-icon">🌊</div>
+        <div><div class="mode-card-title">常规释放</div><div class="mode-card-desc">从当下的感受出发，识别背后的"想要"，逐步释放。适合日常情绪清理。</div></div>
+      </div>
+      <div class="mode-card" onclick="startMode('goal')">
+        <div class="mode-card-icon">🎯</div>
+        <div><div class="mode-card-title">目标双面释放</div><div class="mode-card-desc">围绕一个具体目标，释放你对它的执着与恐惧两个面向。让目标从压力变成自由。</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REGULAR RELEASE ══ -->
+<div id="screen-regular" class="screen">
+  <div class="scroll" id="regular-scroll">
+    <!-- Step 0 -->
+    <div id="rr-0">
+      <div class="card">
+        <div class="card-label">此刻你处于哪个层级</div>
+        <div class="emo-list">
+          <button class="emo-btn" onclick="pickEmo(this,'apathy','冷漠')" style="--dot-color:#9FB0B8">
+            <span class="emo-level">1</span><div class="emo-dot"></div>
+            <div class="emo-info"><div class="emo-name">冷漠</div><div class="emo-sub">麻木、提不起劲、空洞、什么都无所谓</div></div>
+          </button>
+          <button class="emo-btn" onclick="pickEmo(this,'grief','悲伤')" style="--dot-color:#7A9FBF">
+            <span class="emo-level">2</span><div class="emo-dot"></div>
+            <div class="emo-info"><div class="emo-name">悲伤</div><div class="emo-sub">沉重、低落、想哭、失落、遗憾</div></div>
+          </button>
+          <button class="emo-btn" onclick="pickEmo(this,'fear','恐惧')" style="--dot-color:#7A9FB8">
+            <span class="emo-level">3</span><div class="emo-dot"></div>
+            <div class="emo-info"><div class="emo-name">恐惧</div><div class="emo-sub">焦虑、担忧、紧绷、害怕、不安</div></div>
+          </button>
+          <button class="emo-btn" onclick="pickEmo(this,'craving','欲望 / 渴望')" style="--dot-color:#A89870">
+            <span class="emo-level">4</span><div class="emo-dot"></div>
+            <div class="emo-info"><div class="emo-name">欲望 / 渴望</div><div class="emo-sub">强烈想要、执着、抓取、渴望得到</div></div>
+          </button>
+          <button class="emo-btn" onclick="pickEmo(this,'anger','愤怒')" style="--dot-color:#B87870">
+            <span class="emo-level">5</span><div class="emo-dot"></div>
+            <div class="emo-info"><div class="emo-name">愤怒</div><div class="emo-sub">烦躁、挫败、不满、愤恨、抗拒</div></div>
+          </button>
+          <button class="emo-btn" onclick="pickEmo(this,'pride','傲慢')" style="--dot-color:#9888B0">
+            <span class="emo-level">6</span><div class="emo-dot"></div>
+            <div class="emo-info"><div class="emo-name">傲慢</div><div class="emo-sub">委屈、不甘、自以为是、优越感、不屑</div></div>
+          </button>
+          <button class="emo-btn" onclick="pickEmo(this,'courage','勇气')" style="--dot-color:#6A9870">
+            <span class="emo-level">7</span><div class="emo-dot"></div>
+            <div class="emo-info"><div class="emo-name">勇气</div><div class="emo-sub">愿意面对、有行动力、开放、敢于尝试</div></div>
+          </button>
+          <button class="emo-btn" onclick="pickEmo(this,'acceptance','接纳')" style="--dot-color:#5A8888">
+            <span class="emo-level">8</span><div class="emo-dot"></div>
+            <div class="emo-info"><div class="emo-name">接纳</div><div class="emo-sub">平和、允许事物本来的样子、不再抗拒</div></div>
+          </button>
+          <button class="emo-btn" onclick="pickEmo(this,'peace','平静')" style="--dot-color:#5A9888">
+            <span class="emo-level">9</span><div class="emo-dot"></div>
+            <div class="emo-info"><div class="emo-name">平静</div><div class="emo-sub">宁静、完全的安住、无需任何东西改变</div></div>
+          </button>
+        </div>
+      </div>
+      <button class="btn-primary hidden" id="emo-next" onclick="rrGoStep(1)">继续 →</button>
+    </div>
+    <!-- Step 1 breath -->
+    <div id="rr-1" class="hidden">
+      <div class="progress-bar" id="rrpb-1"></div>
+      <div class="card">
+        <div class="card-label">第一步 · 落地</div>
+        <div class="card-title">先让身体平静下来</div>
+        <div class="card-body">释放从身体开始，不是从头脑。轻触圆圈，跟随呼吸做三轮。</div>
+        <div class="breath-wrap">
+          <div class="breath-ring" id="rr-breath-ring" onclick="startRRBreath()">
+            <div class="breath-word" id="rr-bword">轻触</div>
+            <div class="breath-count" id="rr-bcount"></div>
+          </div>
+          <div class="breath-hint" id="rr-bhint">点击开始呼吸</div>
+        </div>
+      </div>
+      <button class="btn-primary hidden" id="rr-breath-next" onclick="rrGoStep(2)">感受到了，继续 →</button>
+      <button class="btn-secondary" onclick="rrGoStep(2)">跳过</button>
+    </div>
+    <!-- Step 2 feel -->
+    <div id="rr-2" class="hidden">
+      <div class="progress-bar" id="rrpb-2"></div>
+      <div class="card">
+        <div class="card-label" id="rr-feel-label">第二步 · 感受</div>
+        <div class="card-title" id="rr-feel-title">让这个感受在这里</div>
+        <div class="card-body" id="rr-feel-desc">把注意力放到身体上。这个感受在哪里？不要推开它，只是让它在这里。</div>
+      </div>
+      <div class="card card-accent" id="rr-feel-note">
+        <div class="card-body" id="rr-feel-note-text">你无法释放一个你不愿意先承认的感受。承认它，不等于认同它。</div>
+      </div>
+      <button class="btn-primary" onclick="rrGoStep(3)">我感受到了 →</button>
+    </div>
+    <!-- Step 3 release -->
+    <div id="rr-3" class="hidden">
+      <div class="progress-bar" id="rrpb-3"></div>
+
+      <!-- 3a: the 4 questions -->
+      <div id="rr-3a">
+        <div class="card">
+          <div class="card-label" id="rr-round-label">第三步 · 释放 · 第 1 问</div>
+          <div class="q-text" id="rr-qtext2"></div>
+          <div class="ans-col" id="rr-qans"></div>
+        </div>
+        <div class="card hidden" id="rr-qresp"></div>
+      </div>
+
+      <!-- 3b: check-in after round -->
+      <div id="rr-3b" class="hidden">
+        <div class="card card-accent">
+          <div class="card-title">感受一下此刻</div>
+          <div class="card-body">闭上眼睛，把注意力放回那个感受上。<br><br>还有剩余的感觉吗？</div>
+        </div>
+        <div class="ans-col">
+          <button class="ans-btn" onclick="continueRounds()">有，继续释放情绪</button>
+          <button class="ans-btn" onclick="rrGoStep(4)">想深入，去释放三大想要</button>
+          <button class="ans-btn" onclick="rrGoStep(6)">感觉已经够了，完成</button>
+        </div>
+      </div>
+    </div>
+    <!-- Step 4 want -->
+    <div id="rr-4" class="hidden">
+      <div class="progress-bar" id="rrpb-4"></div>
+
+      <!-- 4a: pick want -->
+      <div id="rr-4a">
+        <div class="card">
+          <div class="card-label">第四步 · 三大想要</div>
+          <div class="card-title">此刻你感受到哪种想要？</div>
+          <div class="card-body">诚实看一看，第一感觉最准。</div>
+        </div>
+        <div class="want-cards">
+          <button class="want-btn" onclick="rrPickWant(this,'approval')"><div class="want-title">🤝 想要认可 / 被爱</div><div class="want-desc">希望被接受、被理解，担心别人如何看自己</div></button>
+          <button class="want-btn" onclick="rrPickWant(this,'control')"><div class="want-title">🎛 想要控制</div><div class="want-desc">希望事情按自己方式发展，无法接受不确定</div></button>
+          <button class="want-btn" onclick="rrPickWant(this,'security')"><div class="want-title">🛡 想要安全感</div><div class="want-desc">担心失去，需要保证和稳定才能放松</div></button>
+        </div>
+      </div>
+
+      <!-- 4b: release the want -->
+      <div id="rr-4b" class="hidden">
+        <div class="card card-purple">
+          <div class="card-label" id="rr-want-qlabel">释放想要 · 第 1 次</div>
+          <div class="card-title" id="rr-want-qtitle"></div>
+          <div class="q-text" id="rr-want-qtext">你能让它离开吗？</div>
+          <div class="ans-col">
+            <button class="ans-btn" onclick="rrWantAnswer('yes')">可以，我放下一点</button>
+            <button class="ans-btn" onclick="rrWantAnswer('try')">很难，但我愿意</button>
+            <button class="ans-btn" onclick="rrWantAnswer('no')">还放不下</button>
+          </div>
+        </div>
+        <div class="card hidden" id="rr-want-resp"></div>
+      </div>
+
+      <!-- 4c: check-in after want release -->
+      <div id="rr-4c" class="hidden">
+        <div class="card card-accent">
+          <div class="card-title">还有剩余的想要吗？</div>
+          <div class="card-body">感受一下，这个想要有没有松动？还有其他的想要浮现吗？</div>
+        </div>
+        <div class="ans-col">
+          <button class="ans-btn" onclick="rrWantAgain()">有，继续释放想要</button>
+          <button class="ans-btn" onclick="rrGoStep(6)">已经够了，完成</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Step 6<!-- Step 6 done -->
+    <div id="rr-6" class="hidden">
+      <div class="card"><div class="completion-icon">🌿</div><div class="card-label">练习完成</div><div class="card-title">你刚刚完成了一次释放</div><div class="card-body">哪怕只是松动了一点点，这已经是真实的改变。感受会一层一层地释放，这很正常。</div></div>
+      <div class="card"><div class="card-label">带入今天的提示</div><div class="tip-row"><div class="tip-icon">🌬</div><div class="tip-text"><strong>随时释放</strong>：当你感到压力时，只需问"我能放下这个感受吗？"</div></div><div class="tip-row"><div class="tip-icon">🔁</div><div class="tip-text"><strong>重复是力量</strong>：每天5分钟，比偶尔一次大释放更有效</div></div></div>
+      <button class="btn-primary" onclick="startMode('regular')">再做一次</button>
+      <button class="btn-secondary" onclick="startMode('goal')">试试目标双面释放</button>
+      <button class="btn-secondary" onclick="switchTab('records')">查看记录</button>
+    </div>
+  </div>
+  <div class="stuck-bar"><button class="stuck-btn" onclick="openStuck('regular')">🤔 我卡住了</button></div>
+</div>
+
+<!-- ══ GOAL RELEASE ══ -->
+<div id="screen-goal" class="screen">
+  <div class="scroll" id="goal-scroll">
+    <div id="gg-0">
+      <div class="card"><div class="card-label">目标双面释放</div><div class="card-title">你想围绕哪个目标来释放？</div><div class="card-body" style="margin-bottom:14px">写下这个目标。可以是任何事——工作、关系、健康、某个结果。</div><textarea class="text-input" id="goal-input" placeholder="比如：我想通过这次考试……我想改善和某人的关系……"></textarea><button class="btn-primary" onclick="startGoal()">开始双面释放 →</button></div>
+      <div class="card card-purple"><div class="card-body">双面释放：我们对目标通常同时有"渴望它发生"和"害怕它不发生"两种张力。把两面都释放，目标才能真正自由流动。</div></div>
+    </div>
+    <div id="gg-1" class="hidden">
+      <div class="progress-bar" id="ggpb-1"></div>
+      <div class="card"><div class="card-label">落地 · 准备</div><div class="card-title">先让身体安定下来</div><div class="card-body">带着你的目标，先让身体和呼吸同步。</div><div class="breath-wrap"><div class="breath-ring" id="gg-breath-ring" onclick="startGGBreath()"><div class="breath-word" id="gg-bword">轻触</div><div class="breath-count" id="gg-bcount"></div></div><div class="breath-hint" id="gg-bhint">点击开始呼吸</div></div></div>
+      <button class="btn-primary hidden" id="gg-breath-next" onclick="ggGoStep(2)">准备好了，继续 →</button>
+      <button class="btn-secondary" onclick="ggGoStep(2)">跳过</button>
+    </div>
+    <div id="gg-2" class="hidden">
+      <div class="progress-bar" id="ggpb-2"></div>
+      <div class="card card-purple"><div class="card-label">第一面 · 正面</div><div class="card-title">关于这个目标，你内心有什么渴望？</div><div class="card-body">把注意力放在目标上。此刻，你对它有什么执着、渴望、或者"一定要"的感觉？让它浮现，不要分析。</div></div>
+      <div class="card"><div class="card-label">你感受到了什么</div><textarea class="text-input" id="goal-sideA-desc" placeholder="比如：我非常想要通过……我必须做到……"></textarea><button class="btn-primary purple" onclick="ggGoStep(3)">我感受到了 →</button></div>
+    </div>
+    <div id="gg-3" class="hidden">
+      <div class="progress-bar" id="ggpb-3"></div>
+      <div class="card"><div class="card-label">第一面 · 识别"想要"</div><div class="card-title">这个渴望背后，核心是什么"想要"？</div><div class="card-body">诚实看一看，第一感觉最准。</div></div>
+      <div class="want-cards">
+        <button class="want-btn" onclick="ggPickWantA(this,'approval')"><div class="want-title">🤝 想要认可 / 被爱</div><div class="want-desc">想被看见、被肯定、被接受</div></button>
+        <button class="want-btn" onclick="ggPickWantA(this,'control')"><div class="want-title">🎛 想要控制</div><div class="want-desc">想要掌控结果，确保它按我的方式发生</div></button>
+        <button class="want-btn" onclick="ggPickWantA(this,'security')"><div class="want-title">🛡 想要安全感</div><div class="want-desc">害怕失去，需要保证</div></button>
+        <button class="want-btn" onclick="ggPickWantA(this,'other')"><div class="want-title">✨ 其他</div><div class="want-desc">我感受到的是别的东西</div></button>
+      </div>
+      <textarea class="text-input hidden" id="gg-wantA-other" placeholder="描述一下这个"想要"……" style="margin-top:10px"></textarea>
+      <button class="btn-primary purple hidden" id="gg-wantA-next" onclick="ggGoStep(4)" style="margin-top:4px">对这个"想要"做释放 →</button>
+    </div>
+    <div id="gg-4" class="hidden">
+      <div class="progress-bar" id="ggpb-4"></div>
+      <div class="card"><div class="card-label">第一面 · 释放</div><div class="card-title" id="gg-A-qtitle">关于这个渴望……</div><div class="q-text" id="gg-A-q1">你能不能，哪怕只是一点点，放下对这个目标的执着？</div><div class="ans-col"><button class="ans-btn" onclick="ggAnswerA('yes')">可以，我放下一点点</button><button class="ans-btn" onclick="ggAnswerA('try')">很难，但我愿意试</button><button class="ans-btn" onclick="ggAnswerA('no')">还做不到</button></div></div>
+      <div class="card card-purple hidden" id="gg-A-resp"></div>
+    </div>
+    <div id="gg-5" class="hidden">
+      <div class="progress-bar" id="ggpb-5"></div>
+      <div class="card card-warm"><div class="card-label">第二面 · 反面</div><div class="card-title">关于这个目标，你有什么担心或抗拒？</div><div class="card-body">现在翻到另一面。如果这个目标<em>没有达到</em>，你内心有什么恐惧、担心、或抗拒的感觉？让它浮现出来。</div></div>
+      <div class="card"><div class="card-label">你感受到了什么</div><textarea class="text-input" id="goal-sideB-desc" placeholder="比如：我很害怕失败……我担心别人失望……"></textarea><button class="btn-primary amber-btn" onclick="ggGoStep(6)">我感受到了 →</button></div>
+    </div>
+    <div id="gg-6" class="hidden">
+      <div class="progress-bar" id="ggpb-6"></div>
+      <div class="card"><div class="card-label">第二面 · 识别"想要"</div><div class="card-title">这个担心背后，核心是什么"想要"？</div><div class="card-body">这一面可能和第一面完全不同。跟着感觉走。</div></div>
+      <div class="want-cards">
+        <button class="want-btn" onclick="ggPickWantB(this,'approval')"><div class="want-title">🤝 想要认可 / 被爱</div><div class="want-desc">害怕被否定、不被接受</div></button>
+        <button class="want-btn" onclick="ggPickWantB(this,'control')"><div class="want-title">🎛 想要控制</div><div class="want-desc">害怕失控，结果不在掌控之中</div></button>
+        <button class="want-btn" onclick="ggPickWantB(this,'security')"><div class="want-title">🛡 想要安全感</div><div class="want-desc">对失去感到恐惧，需要确定性</div></button>
+        <button class="want-btn" onclick="ggPickWantB(this,'other')"><div class="want-title">✨ 其他</div><div class="want-desc">我感受到的是别的东西</div></button>
+      </div>
+      <textarea class="text-input hidden" id="gg-wantB-other" placeholder="描述一下……" style="margin-top:10px"></textarea>
+      <button class="btn-primary amber-btn hidden" id="gg-wantB-next" onclick="ggGoStep(7)" style="margin-top:4px">对这个"想要"做释放 →</button>
+    </div>
+    <div id="gg-7" class="hidden">
+      <div class="progress-bar" id="ggpb-7"></div>
+      <div class="card"><div class="card-label">第二面 · 释放</div><div class="card-title" id="gg-B-qtitle">关于这个担心……</div><div class="q-text" id="gg-B-q1">你能不能，哪怕只是一点点，放下对这个结果的恐惧？</div><div class="ans-col"><button class="ans-btn" onclick="ggAnswerB('yes')">可以，我放下一点点</button><button class="ans-btn" onclick="ggAnswerB('try')">很难，但我愿意试</button><button class="ans-btn" onclick="ggAnswerB('no')">还做不到</button></div></div>
+      <div class="card card-warm hidden" id="gg-B-resp"></div>
+    </div>
+    <div id="gg-8" class="hidden">
+      <div class="card"><div class="completion-icon">🎯</div><div class="card-label">双面释放完成</div><div class="card-title" id="gg-done-title">目标双面释放完成</div><div class="card-body">你已经对这个目标的两面都做了释放。当执着和恐惧都松开一点，目标就能更自由地流动。</div></div>
+      <div class="card card-accent"><div class="card-body">Lester 说：当你对一个目标完全没有执着，它反而更容易实现。因为执着本身是阻力。</div></div>
+      <button class="btn-primary purple" onclick="startMode('goal')">对另一个目标释放</button>
+      <button class="btn-secondary" onclick="startMode('regular')">做常规释放</button>
+      <button class="btn-secondary" onclick="switchTab('records')">查看记录</button>
+    </div>
+  </div>
+  <div class="stuck-bar"><button class="stuck-btn" onclick="openStuck('goal')">🤔 我卡住了</button></div>
+</div>
+
+<!-- ══ RECORDS ══ -->
+<div id="screen-records" class="screen">
+  <div class="scroll" id="records-scroll">
+    <div id="records-container"></div>
+  </div>
+</div>
+
+<!-- ══ AI CHAT ══ -->
+<div id="screen-ai" class="screen" style="flex-direction:column">
+  <div class="ai-header">
+    <div class="ai-header-left">
+      <span class="ai-header-title">AI 释放对话</span>
+      <span class="ai-model-badge" id="ai-model-badge">DeepSeek</span>
+    </div>
+    <button class="ai-settings-btn" onclick="showApiKeyOverlay()">⚙ 设置</button>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-input-wrap">
+    <div class="chat-input-row">
+      <textarea class="chat-input" id="chat-input" placeholder="写下你现在的感受……" rows="1" oninput="autoResize(this)" onkeydown="chatEnter(event)"></textarea>
+      <button class="send-btn" id="send-btn" onclick="sendChat()">
+        <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+<script>
+// ════════ THEME ════════
+var currentTheme = localStorage.getItem('release_theme') || 'ocean';
+var oceanRAF = null;
+
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  document.body.style.background = t==='night' ? '#0D1117' : '#F0F7FA';
+  document.getElementById('theme-btn').textContent = t==='ocean' ? '🌊' : '✦';
+  if(t==='night'){ stopOcean(); generateStars(); }
+  else { clearStars(); startOcean(); }
+  if(soundOn){ stopSound(); startAmbientSound(); }
+  localStorage.setItem('release_theme',t);
+}
+function toggleTheme(){
+  currentTheme = currentTheme==='ocean' ? 'night' : 'ocean';
+  applyTheme(currentTheme);
+}
+
+// ── STARS ──
+function generateStars(){
+  var c=document.getElementById('stars-container'); c.innerHTML='';
+  for(var i=0;i<80;i++){
+    var s=document.createElement('div'); s.className='star';
+    var sz=(Math.random()*1.8+0.5).toFixed(1);
+    s.style.cssText='width:'+sz+'px;height:'+sz+'px;top:'+(Math.random()*100)+'%;left:'+(Math.random()*100)+'%;--dur:'+(2+Math.random()*4).toFixed(1)+'s;--delay:'+(Math.random()*4).toFixed(1)+'s;opacity:'+(0.2+Math.random()*0.6)+';';
+    c.appendChild(s);
+  }
+}
+function clearStars(){document.getElementById('stars-container').innerHTML='';}
+
+// ── OCEAN CANVAS — subtle realist ripples only ──
+function stopOcean(){
+  if(oceanRAF){cancelAnimationFrame(oceanRAF);oceanRAF=null;}
+}
+
+function startOcean(){
+  var canvas=document.getElementById('ocean-canvas');
+  var W=430, H=window.innerHeight||812;
+  canvas.width=W; canvas.height=H;
+  var ctx=canvas.getContext('2d');
+
+  // Three sparse ripple lines positioned in lower third of screen
+  // Each is a very faint sine curve — like light bending through shallow water
+  var ripples=[
+    {yBase:H*0.72, amp:2.8, freq:0.020, speed:0.40, phase:0,   alpha:0.13, width:1.0},
+    {yBase:H*0.79, amp:2.2, freq:0.016, speed:0.28, phase:2.1, alpha:0.09, width:0.8},
+    {yBase:H*0.86, amp:1.6, freq:0.024, speed:0.35, phase:4.3, alpha:0.07, width:0.7},
+  ];
+
+  var t=0;
+  function drawFrame(){
+    ctx.clearRect(0,0,W,H);
+
+    ripples.forEach(function(r){
+      ctx.beginPath();
+      for(var x=0;x<=W;x+=1){
+        // two overlapping sinusoids at slightly different frequencies — more natural
+        var y = r.yBase
+              + Math.sin(x*r.freq + t*r.speed + r.phase) * r.amp
+              + Math.sin(x*r.freq*1.618 + t*r.speed*0.7 + r.phase*1.3) * r.amp*0.4;
+        if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.strokeStyle='rgba(58,143,163,'+r.alpha+')';
+      ctx.lineWidth=r.width;
+      ctx.stroke();
+    });
+
+    t+=0.016;
+    oceanRAF=requestAnimationFrame(drawFrame);
+  }
+  drawFrame();
+}
+
+applyTheme(currentTheme);
+// restore sound preference
+if(localStorage.getItem('release_sound')==='1'){
+  soundOn=true;
+  var sb=document.getElementById('sound-btn');
+  if(sb){sb.textContent='🔊';sb.classList.add('on');}
+  // restore volume slider
+  var vs=document.getElementById('vol-slider');
+  var vv=document.getElementById('vol-val');
+  var vl=Math.round(soundVolume*100);
+  if(vs) vs.value=vl;
+  if(vv) vv.textContent=vl;
+  // autoplay needs user gesture on iOS — start on first touch
+  document.addEventListener('touchstart', function startOnTouch(){
+    startAmbientSound();
+    document.removeEventListener('touchstart', startOnTouch);
+  }, {once:true});
+}
+
+// ════════ API KEY & MODEL ════════
+var selectedModel = localStorage.getItem('release_model') || 'deepseek';
+
+var modelConfig = {
+  deepseek: {
+    name: 'DeepSeek',
+    placeholder: 'sk-...',
+    hint: '无需 VPN 可直连。获取 Key：<a href="https://platform.deepseek.com" target="_blank">platform.deepseek.com</a>',
+    keyLabel: 'DeepSeek API Key',
+  },
+  kimi: {
+    name: 'Kimi',
+    placeholder: 'sk-...',
+    hint: '无需 VPN 可直连。获取 Key：<a href="https://platform.moonshot.cn" target="_blank">platform.moonshot.cn</a>',
+    keyLabel: 'Kimi API Key',
+  },
+  claude: {
+    name: 'Claude',
+    placeholder: 'sk-ant-...',
+    hint: '需要 VPN 才能访问。获取 Key：<a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>',
+    keyLabel: 'Claude API Key',
+  },
+};
+
+function getApiKey(){
+  return localStorage.getItem('release_apikey_'+selectedModel)||'';
+}
+
+function selectModel(m){
+  selectedModel = m;
+  document.querySelectorAll('.model-tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('tab-'+m).classList.add('active');
+  var cfg = modelConfig[m];
+  document.getElementById('key-label').textContent = cfg.keyLabel;
+  document.getElementById('apikey-input').placeholder = cfg.placeholder;
+  document.getElementById('key-hint').innerHTML = 'Key 仅保存在本地，不会上传任何地方。<br>'+cfg.hint;
+  // load existing key for this model
+  var existing = localStorage.getItem('release_apikey_'+m)||'';
+  document.getElementById('apikey-input').value = existing;
+}
+
+function saveApiKey(){
+  var val = document.getElementById('apikey-input').value.trim();
+  if(!val){ alert('请输入有效的 API Key'); return; }
+  localStorage.setItem('release_apikey_'+selectedModel, val);
+  localStorage.setItem('release_model', selectedModel);
+  document.getElementById('apikey-overlay').style.display='none';
+  updateModelBadge();
+  document.getElementById('chat-messages').innerHTML='';
+  initChat();
+}
+
+function skipApiKey(){
+  document.getElementById('apikey-overlay').style.display='none';
+}
+
+function showApiKeyOverlay(){
+  // restore current model tab
+  selectModel(selectedModel);
+  document.getElementById('apikey-overlay').style.display='flex';
+}
+
+function updateModelBadge(){
+  var badge = document.getElementById('ai-model-badge');
+  if(badge) badge.textContent = modelConfig[selectedModel].name;
+}
+
+function maybePromptApiKey(){
+  if(!getApiKey()){
+    setTimeout(function(){ showApiKeyOverlay(); }, 300);
+  }
+}
+
+
+// ════════ AMBIENT SOUND ════════
+var soundOn = false;
+var currentAudio = null;
+var soundVolume = parseFloat(localStorage.getItem('release_vol')||'0.7');
+var volPanelTimer = null;
+
+function getAudioEl(theme){
+  return document.getElementById(theme==='night'?'audio-fire':'audio-ocean');
+}
+
+function stopSound(){
+  if(currentAudio){
+    currentAudio.pause();
+    currentAudio.currentTime=0;
+    currentAudio=null;
+  }
+}
+
+function startAmbientSound(){
+  if(!soundOn) return;
+  stopSound();
+  var el = getAudioEl(currentTheme);
+  if(!el) return;
+  el.volume = soundVolume;
+  el.currentTime = 0;
+  el.play().catch(function(){});
+  currentAudio = el;
+}
+
+function toggleSound(){
+  soundOn = !soundOn;
+  var btn = document.getElementById('sound-btn');
+  if(soundOn){
+    btn.textContent='🔊';
+    btn.classList.add('on');
+    startAmbientSound();
+    showVolPanel();
+  } else {
+    btn.textContent='🔇';
+    btn.classList.remove('on');
+    stopSound();
+    hideVolPanel();
+  }
+  localStorage.setItem('release_sound', soundOn?'1':'0');
+}
+
+function showVolPanel(){
+  var p=document.getElementById('vol-panel');
+  p.classList.add('show');
+  clearTimeout(volPanelTimer);
+  volPanelTimer=setTimeout(hideVolPanel, 3000);
+}
+
+function hideVolPanel(){
+  document.getElementById('vol-panel').classList.remove('show');
+}
+
+function setVolume(val){
+  soundVolume = val/100;
+  document.getElementById('vol-val').textContent=val;
+  if(currentAudio) currentAudio.volume=soundVolume;
+  localStorage.setItem('release_vol', soundVolume);
+  clearTimeout(volPanelTimer);
+  volPanelTimer=setTimeout(hideVolPanel, 2500);
+}
+
+// ════════ STATE ════════
+var G={
+  currentTab:'home',rrEmo:null,rrEmoName:'',rrWant:null,rrQIdx:0,
+  rrBreathRunning:false,rrBreathPhase:0,rrBreathTimer:null,
+  goalText:'',goalSideA:'',goalWantA:null,goalWantALabel:'',
+  goalSideB:'',goalWantB:null,goalWantBLabel:'',
+  ggBreathRunning:false,ggBreathPhase:0,ggBreathTimer:null,
+};
+
+// ════════ NAV ════════
+function switchTab(tab){
+  G.currentTab=tab;
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('screen-'+tab).classList.add('active');
+  var labels={home:'练习',records:'记录',ai:'对话'};
+  document.querySelectorAll('.nav-btn').forEach(function(b){if(b.textContent.trim()===labels[tab])b.classList.add('active');});
+  if(tab==='records') renderRecords();
+  if(tab==='ai'){
+    if(document.getElementById('chat-messages').children.length===0) initChat();
+    maybePromptApiKey();
+  }
+}
+function startMode(mode){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById('screen-'+mode).classList.add('active');
+  if(mode==='regular') resetRegular();
+  if(mode==='goal') resetGoal();
+}
+
+// ════════ PROGRESS ════════
+function renderPB(id,current,total){
+  var el=document.getElementById(id); if(!el)return;
+  var h=''; for(var i=1;i<=total;i++){var c=i<current?'done':(i===current?'active':'');h+='<div class="dot '+c+'"></div>';}
+  el.innerHTML=h;
+}
+
+// ════════ STUCK ════════
+var stuckReturnMode=null,stuckReturnStep=null;
+function openStuck(mode){
+  stuckReturnMode=mode;
+  var prefix=mode==='regular'?'rr-':'gg-'; var curStep=0;
+  document.querySelectorAll('[id^="'+prefix+'"]').forEach(function(el){
+    if(!el.classList.contains('hidden')){var n=parseInt(el.id.replace(prefix,''));if(!isNaN(n))curStep=n;}
+  });
+  stuckReturnStep=curStep;
+  document.getElementById('stuck-input').value='';
+  document.getElementById('stuck-overlay').classList.add('show');
+}
+function closeStuck(){document.getElementById('stuck-overlay').classList.remove('show');}
+function closeStuckIfOutside(e){if(e.target===document.getElementById('stuck-overlay'))closeStuck();}
+function processStuck(){
+  var thought=document.getElementById('stuck-input').value.trim(); if(!thought)return;
+  closeStuck();
+  showStuckRelease(thought,stuckReturnMode,stuckReturnStep);
+}
+function showStuckRelease(thought,returnMode,returnStep){
+  var scrollId=returnMode==='regular'?'regular-scroll':'goal-scroll';
+  var scroll=document.getElementById(scrollId);
+  var prefix=returnMode==='regular'?'rr-':'gg-';
+  document.getElementById(prefix+returnStep).classList.add('hidden');
+  var div=document.createElement('div'); div.id='stuck-mini';
+  div.innerHTML='<div class="card card-red"><div class="card-label">卡住释放</div><div class="card-title">对这个想法做一轮释放</div><div class="card-body" style="margin-bottom:10px">想法：「<em>'+thought+'</em>」<br><br>把注意力放在这个想法带来的感受上。它在身体哪里？</div></div><div class="card" id="stuck-q-card"><div class="q-text" id="stuck-q">我能否允许这个感受就在这里，不需要马上解决它？</div><div class="ans-col"><button class="ans-btn" onclick="stuckQ2(\'yes\')">可以，我允许</button><button class="ans-btn" onclick="stuckQ2(\'try\')">有点难，但我试试</button><button class="ans-btn" onclick="stuckQ2(\'no\')">很难</button></div></div>';
+  scroll.prepend(div); scroll.scrollTo({top:0,behavior:'smooth'});
+  window._stuckReturnMode=returnMode; window._stuckReturnStep=returnStep;
+}
+function stuckQ2(ans){
+  var card=document.getElementById('stuck-q-card');
+  var r={yes:'好。现在问：我能放下对它的抗拒吗？',try:'这份愿意已经足够。现在问：我能放下一点点吗？',no:'连"允许它"都做不到也没关系——对这个"做不到"本身，我能允许它存在吗？'};
+  card.innerHTML='<div class="q-text">'+r[ans]+'</div><div class="ans-col"><button class="ans-btn" onclick="stuckQ3(\'yes\')">可以，我放下一点</button><button class="ans-btn" onclick="stuckQ3(\'try\')">我愿意</button><button class="ans-btn" onclick="stuckQ3(\'no\')">还做不到</button></div>';
+}
+function stuckQ3(ans){
+  var card=document.getElementById('stuck-q-card');
+  var msg=ans==='no'?'没关系。放不下本身也是诚实的。深呼吸，我们继续回到原来的地方。':'很好。那一点点松开，就已经是真实的释放。现在回到刚才中断的地方继续。';
+  card.innerHTML='<div class="card-body" style="color:var(--accent-dark)">'+msg+'</div><button class="btn-primary" style="margin-top:14px" onclick="returnFromStuck()">回到刚才的释放 →</button>';
+}
+function returnFromStuck(){
+  var div=document.getElementById('stuck-mini'); if(div)div.remove();
+  var prefix=window._stuckReturnMode==='regular'?'rr-':'gg-';
+  var el=document.getElementById(prefix+window._stuckReturnStep); if(el)el.classList.remove('hidden');
+  document.getElementById(window._stuckReturnMode==='regular'?'regular-scroll':'goal-scroll').scrollTo({top:0,behavior:'smooth'});
+}
+
+// ════════ BREATH ════════
+var bPhases=[
+  {word:'吸气',hint:'慢慢吸气 4 秒……',scale:1.28,dur:4000},
+  {word:'屏住',hint:'屏住 2 秒……',scale:1.28,dur:2000},
+  {word:'呼气',hint:'缓缓呼气 6 秒……',scale:1,dur:6000},
+  {word:'休息',hint:'休息 2 秒……',scale:1,dur:2000},
+];
+function runBreath(cfg){
+  var p=bPhases[cfg.phase%4]; var round=Math.floor(cfg.phase/4)+1;
+  document.getElementById(cfg.wordId).textContent=p.word;
+  document.getElementById(cfg.countId).textContent=round+' / '+cfg.rounds;
+  document.getElementById(cfg.hintId).textContent=p.hint;
+  var ring=document.getElementById(cfg.ringId);
+  ring.style.transform='scale('+p.scale+')';
+  if(currentTheme==='night'){ring.classList.toggle('expanding',p.scale>1);}
+  cfg.phase++;
+  if(cfg.phase>=cfg.rounds*4){
+    cfg.timer=setTimeout(function(){
+      document.getElementById(cfg.wordId).textContent='完成';
+      document.getElementById(cfg.countId).textContent='';
+      document.getElementById(cfg.hintId).textContent='感受一下身体此刻的状态';
+      ring.style.transform='scale(1)';ring.classList.remove('expanding');
+      if(cfg.nextBtn) document.getElementById(cfg.nextBtn).classList.remove('hidden');
+    },p.dur); return;
+  }
+  cfg.timer=setTimeout(function(){runBreath(cfg);},p.dur);
+}
+
+// ════════ REGULAR RELEASE ════════
+var rrTotalSteps=4;
+var rrEmoDesc={
+  apathy:'冷漠是最沉的层级——身体好像提不起来，什么都无所谓。不要强迫自己感受，只是轻轻把注意力放在这个"空"上面。它在身体哪里？',
+  grief:'悲伤是一种沉重的能量。也许有什么失去了，或者从未得到过。不要推开它——让这个沉重在这里，不需要解释它为什么在。',
+  fear:'恐惧让身体进入警觉状态，思绪转个不停。把注意力从头脑移到身体——这个紧绷感在哪里？胸口、腹部、还是喉咙？',
+  craving:'渴望是一种张力——强烈想要某样东西，感觉缺少了它就不完整。感受一下这个"想要"在身体哪里，它是什么质地的？',
+  anger:'愤怒是有能量的层级，比冷漠、悲伤都更活跃。感受一下这个热度或紧绷在身体哪里——不要评判它，只是允许它在这里。',
+  pride:'傲慢或委屈的背后，通常是受伤。你觉得自己比某些事物更好，或者不应该经历这个。让这个感受在这里，不需要它改变。',
+  courage:'你现在处于勇气的层级——愿意面对，有开放感。这是释放的好时机，能量在流动。把注意力放在此刻这个开放的感觉上。',
+  acceptance:'接纳是一种允许的状态。你不再抗拒事物本来的样子。感受一下这个平和在身体哪里——让它更深一点。',
+  peace:'平静是很深的层级。此刻你可能感到安住，不需要任何东西改变。把注意力轻轻放在这个宁静上，让它自然地扩展。',
+};
+// Four questions per round — the Lester sequence
+var rrQuestions=[
+  {q:'我能否允许这个感受，就在此刻，不需要它变得不同？',
+   answers:['可以，我允许它在这里','有一点难，但我愿意试','很难，做不到'],
+   resp:{0:'很好。允许它在这里，就是释放的开始。',1:'"有一点难"已经足够了，一丝开放就够。',2:'"做不到"也是一个感受——你也可以对它说允许。'}},
+  {q:'你愿意让它离开吗？',
+   answers:['愿意','有一点不确定','不太愿意'],
+   resp:{0:'好。这份意愿本身就是一扇门。',1:'模糊的意愿也够用，不需要完全确定。',2:'不愿意也没关系——可以先问自己：我愿意愿意吗？'}},
+  {q:'你能让它离开吗？',
+   answers:['可以，我能','也许可以','感觉做不到'],
+   resp:{0:'很好。能，就已经是松动了。',1:'"也许"就已经够了，继续。',2:'感觉做不到——那就只是允许这个"做不到"在这里。'}},
+  {q:'什么时候？',
+   answers:['现在','慢慢来','还不确定'],
+   resp:{0:'就是现在。深呼吸，轻轻松开。',1:'没关系，每一次练习都是在松开。',2:'不确定也可以。这一轮已经完成了。'}},
+];
+
+var rrTotalRounds=3;
+var rrCurrentRound=0;
+var rrCurrentQ=0;
+
+var rrWantData={
+  approval:{
+    feelTitle:'你能感受到"想要认可"吗？',
+    feelDesc:'把注意力放在内心——有没有一个地方在渴望被看见、被接受、被认同？它在身体哪里？',
+    qtitle:'对于"想要认可"……',
+    qtext:'你能不能，哪怕只是一点点，放下此刻对被认可的渴望？不是放弃它，只是松开对它的抓取。'
+  },
+  control:{
+    feelTitle:'你能感受到"想要控制"吗？',
+    feelDesc:'有没有一个地方在用力抓着——希望事情必须按某个方式发展？感受一下这个张力在哪里。',
+    qtitle:'对于"想要控制"……',
+    qtext:'你能不能，哪怕只是一点点，放下此刻对结果的掌控欲？事情本来的样子，也许可以是ok的。'
+  },
+  security:{
+    feelTitle:'你能感受到"想要安全感"吗？',
+    feelDesc:'有没有一个地方在担心失去、害怕不够好、需要确定和保证？让这个感受浮现出来。',
+    qtitle:'对于"想要安全感"……',
+    qtext:'你能不能，哪怕只是一点点，放下此刻对安全和保证的需求？此刻你是安全的。'
+  },
+};
+
+var rrWantRound=0;
+
+var rrBreathCfg={ringId:'rr-breath-ring',wordId:'rr-bword',countId:'rr-bcount',hintId:'rr-bhint',nextBtn:'rr-breath-next',rounds:3,phase:0,timer:null};
+
+function resetRegular(){
+  G.rrEmo=null;G.rrEmoName='';G.rrWant=null;G.rrQIdx=0;
+  rrCurrentRound=0;rrCurrentQ=0;rrWantRound=0;
+  G.rrBreathRunning=false; rrBreathCfg.phase=0;
+  if(rrBreathCfg.timer)clearTimeout(rrBreathCfg.timer);
+  for(var _i=0;_i<=5;_i++){var _s=document.getElementById('rr-'+_i);if(_s)_s.classList.add('hidden');}
+  document.querySelectorAll('#screen-regular .emo-btn').forEach(function(b){b.classList.remove('sel');});
+  document.getElementById('emo-next').classList.add('hidden');
+  document.getElementById('rr-0').classList.remove('hidden');
+  document.getElementById('rr-qresp').classList.add('hidden');
+  document.getElementById('rr-want-resp').classList.add('hidden');
+  document.getElementById('rr-breath-next').classList.add('hidden');
+  document.querySelectorAll('#screen-regular .want-btn').forEach(function(b){b.classList.remove('sel');});
+  document.getElementById('regular-scroll').scrollTo({top:0});
+}
+function pickEmo(btn,key,name){
+  document.querySelectorAll('#screen-regular .emo-btn').forEach(function(b){b.classList.remove('sel');});
+  btn.classList.add('sel'); G.rrEmo=key; G.rrEmoName=name;
+  document.getElementById('emo-next').classList.remove('hidden');
+}
+function rrGoStep(n){
+  for(var _i=0;_i<=5;_i++){var _s=document.getElementById('rr-'+_i);if(_s)_s.classList.add('hidden');}
+  var el=document.getElementById('rr-'+n);
+  if(el){el.classList.remove('hidden');renderPB('rrpb-'+n,n,rrTotalSteps);}
+  document.getElementById('regular-scroll').scrollTo({top:0,behavior:'smooth'});
+  if(n===6){saveRecord({id:Date.now(),date:new Date().toISOString(),mode:'regular',emotion:G.rrEmoName,want:G.rrWant,notes:''}); }
+  if(n===1){rrBreathCfg.phase=0;G.rrBreathRunning=false;document.getElementById('rr-bword').textContent='轻触';document.getElementById('rr-bcount').textContent='';document.getElementById('rr-bhint').textContent='点击开始呼吸';document.getElementById('rr-breath-ring').style.transform='scale(1)';document.getElementById('rr-breath-next').classList.add('hidden');}
+  if(n===2){
+    document.getElementById('rr-feel-desc').textContent=rrEmoDesc[G.rrEmo]||rrEmoDesc.fear;
+    var highLevels=['courage','acceptance','peace'];
+    var isHigh=highLevels.indexOf(G.rrEmo)>=0;
+    document.getElementById('rr-feel-title').textContent=isHigh?'深化这个状态':'让这个感受在这里';
+    document.getElementById('rr-feel-label').textContent=isHigh?'第二步 · 深化':'第二步 · 感受';
+    document.getElementById('rr-feel-note-text').textContent=isHigh
+      ?'处于较高层级时，释放是为了让这个状态更稳定，而不是消除它。你可以释放对"维持这个状态"的执着。'
+      :'你无法释放一个你不愿意先承认的感受。承认它，不等于认同它。';
+  }
+  if(n===3){
+    rrCurrentRound=1; rrCurrentQ=0;
+    document.getElementById('rr-3a').classList.remove('hidden');
+    document.getElementById('rr-3b').classList.add('hidden');
+    rrShowQ();
+  }
+  if(n===4){
+    document.getElementById('rr-4a').classList.remove('hidden');
+    document.getElementById('rr-4b').classList.add('hidden');
+  }
+  if(n===5){
+    rrWantRound=0;
+      rrShowWantQ();
+  }
+}
+function startRRBreath(){
+  if(G.rrBreathRunning)return; G.rrBreathRunning=true;
+  runBreath(rrBreathCfg);
+}
+function startRounds(){
+  rrCurrentRound=1; rrCurrentQ=0;
+  document.getElementById('rr-3a').classList.remove('hidden');
+  document.getElementById('rr-3b').classList.add('hidden');
+  rrShowQ();
+}
+
+function rrShowQ(){
+  var q=rrQuestions[rrCurrentQ];
+  document.getElementById('rr-round-label').textContent='第 '+rrCurrentRound+' 轮 · 第 '+(rrCurrentQ+1)+' 问 / 4';
+  document.getElementById('rr-qtext2').textContent=q.q;
+  var ansEl=document.getElementById('rr-qans');
+  ansEl.innerHTML='';
+  q.answers.forEach(function(a,idx){
+    var btn=document.createElement('button');
+    btn.className='ans-btn';
+    btn.textContent=a;
+    btn.onclick=(function(i){return function(){rrAnswer(i);};})(idx);
+    ansEl.appendChild(btn);
+  });
+  document.getElementById('rr-qresp').classList.add('hidden');
+}
+
+function rrAnswer(idx){
+  var q=rrQuestions[rrCurrentQ];
+  var respText=q.resp[idx];
+  var el=document.getElementById('rr-qresp');
+  el.className='card card-accent';
+  el.innerHTML='<div class="card-body">'+respText+'</div>';
+  el.classList.remove('hidden');
+  rrCurrentQ++;
+  if(rrCurrentQ<rrQuestions.length){
+    setTimeout(function(){rrShowQ();},1600);
+  } else {
+    // round done — show check-in
+    setTimeout(function(){
+      document.getElementById('rr-3a').classList.add('hidden');
+      document.getElementById('rr-qresp').classList.add('hidden');
+      document.getElementById('rr-3b').classList.remove('hidden');
+    },1600);
+  }
+}
+
+function continueRounds(){
+  rrCurrentRound++;
+  rrCurrentQ=0;
+  document.getElementById('rr-3b').classList.add('hidden');
+  document.getElementById('rr-3a').classList.remove('hidden');
+  rrShowQ();
+}
+function rrPickWant(btn,key){
+  document.querySelectorAll('#rr-4 .want-btn').forEach(function(b){b.classList.remove('sel');});
+  btn.classList.add('sel'); G.rrWant=key;
+  var d=rrWantData[key];
+  document.getElementById('rr-4a').classList.add('hidden');
+  document.getElementById('rr-4b').classList.remove('hidden');
+  document.getElementById('rr-4c').classList.add('hidden');
+  document.getElementById('rr-want-qlabel').textContent='释放想要 · 第 '+(rrWantRound+1)+' 次';
+  document.getElementById('rr-want-qtitle').textContent=d.qtitle;
+  document.getElementById('rr-want-resp').classList.add('hidden');
+}
+
+function rrWantAgain(){
+  // back to pick want
+  rrWantRound++;
+  document.getElementById('rr-4c').classList.add('hidden');
+  document.getElementById('rr-4a').classList.remove('hidden');
+  document.getElementById('rr-4b').classList.add('hidden');
+  document.querySelectorAll('#rr-4 .want-btn').forEach(function(b){b.classList.remove('sel');});
+}
+var rrWantRelResp={
+  yes:'很好。那一点点松开，就是真实的释放。',
+  try:'愿意尝试本身就是释放的开始。',
+  no:'放不下也没关系——"放不下"本身也是一个感受，可以继续允许它。',
+};
+
+function rrWantAnswer(ans){
+  var el=document.getElementById('rr-want-resp');
+  el.className='card '+(ans==='no'?'card-warm':'card-accent');
+  el.innerHTML='<div class="card-body">'+rrWantRelResp[ans]+'</div>';
+  el.classList.remove('hidden');
+  setTimeout(function(){
+    el.classList.add('hidden');
+    document.getElementById('rr-4b').classList.add('hidden');
+    document.getElementById('rr-4c').classList.remove('hidden');
+  },1600);
+}
+
+// ════════ GOAL RELEASE ════════
+var ggTotalSteps=7;
+var ggBreathCfg={ringId:'gg-breath-ring',wordId:'gg-bword',countId:'gg-bcount',hintId:'gg-bhint',nextBtn:'gg-breath-next',rounds:3,phase:0,timer:null};
+var ggWantLabels={approval:'想要认可',control:'想要控制',security:'想要安全感',other:'其他'};
+var ggRelResp={yes:'很好。那一点松开，就是真实的释放。',try:'这份愿意就足够了。继续保持这个开放。',no:'没关系。我们诚实面对它，然后继续到另一面。'};
+
+function resetGoal(){
+  G.goalText='';G.goalSideA='';G.goalWantA=null;G.goalWantALabel='';
+  G.goalSideB='';G.goalWantB=null;G.goalWantBLabel='';
+  G.ggBreathRunning=false;ggBreathCfg.phase=0;
+  if(ggBreathCfg.timer)clearTimeout(ggBreathCfg.timer);
+  for(var _i=0;_i<=8;_i++){var _s=document.getElementById('gg-'+_i);if(_s)_s.classList.add('hidden');}
+  document.getElementById('gg-0').classList.remove('hidden');
+  document.getElementById('goal-input').value='';
+  document.getElementById('goal-sideA-desc').value='';
+  document.getElementById('goal-sideB-desc').value='';
+  ['gg-wantA-other','gg-wantB-other'].forEach(function(id){document.getElementById(id).classList.add('hidden');});
+  ['gg-wantA-next','gg-wantB-next','gg-A-resp','gg-B-resp','gg-breath-next'].forEach(function(id){document.getElementById(id).classList.add('hidden');});
+  document.querySelectorAll('#screen-goal .want-btn').forEach(function(b){b.classList.remove('sel');});
+  document.getElementById('goal-scroll').scrollTo({top:0});
+}
+function startGoal(){
+  var txt=document.getElementById('goal-input').value.trim(); if(!txt)return;
+  G.goalText=txt; ggGoStep(1);
+}
+function ggGoStep(n){
+  for(var _i=0;_i<=8;_i++){var _s=document.getElementById('gg-'+_i);if(_s)_s.classList.add('hidden');}
+  var el=document.getElementById('gg-'+n);
+  if(el){el.classList.remove('hidden');renderPB('ggpb-'+n,n,ggTotalSteps);}
+  document.getElementById('goal-scroll').scrollTo({top:0,behavior:'smooth'});
+  if(n===1){ggBreathCfg.phase=0;G.ggBreathRunning=false;document.getElementById('gg-bword').textContent='轻触';document.getElementById('gg-bcount').textContent='';document.getElementById('gg-bhint').textContent='点击开始呼吸';document.getElementById('gg-breath-ring').style.transform='scale(1)';document.getElementById('gg-breath-next').classList.add('hidden');}
+  if(n===8){
+    document.getElementById('gg-done-title').textContent='目标双面释放完成';
+    saveRecord({id:Date.now(),date:new Date().toISOString(),mode:'goal',goalText:G.goalText,sideA:{desc:G.goalSideA,want:G.goalWantA,wantLabel:G.goalWantALabel},sideB:{desc:G.goalSideB,want:G.goalWantB,wantLabel:G.goalWantBLabel},notes:''});
+  }
+}
+function startGGBreath(){
+  if(G.ggBreathRunning)return; G.ggBreathRunning=true; runBreath(ggBreathCfg);
+}
+function ggPickWantA(btn,key){
+  document.querySelectorAll('#gg-3 .want-btn').forEach(function(b){b.classList.remove('sel');});
+  btn.classList.add('sel'); G.goalWantA=key; G.goalWantALabel=ggWantLabels[key];
+  document.getElementById('gg-wantA-other').classList[key==='other'?'remove':'add']('hidden');
+  document.getElementById('gg-wantA-next').classList.remove('hidden');
+  var qmap={approval:'你能不能，哪怕只是一点点，放下对这个目标中"被认可"的渴望？',control:'你能不能，哪怕只是一点点，放下"一定要控制这个结果"的执着？',security:'你能不能，哪怕只是一点点，放下"必须要安全/保证"的需要？',other:'你能不能，哪怕只是一点点，放下这个渴望？'};
+  document.getElementById('gg-A-qtitle').textContent='关于"'+ggWantLabels[key]+'"……';
+  document.getElementById('gg-A-q1').textContent=qmap[key];
+}
+function ggPickWantB(btn,key){
+  document.querySelectorAll('#gg-6 .want-btn').forEach(function(b){b.classList.remove('sel');});
+  btn.classList.add('sel'); G.goalWantB=key; G.goalWantBLabel=ggWantLabels[key];
+  document.getElementById('gg-wantB-other').classList[key==='other'?'remove':'add']('hidden');
+  document.getElementById('gg-wantB-next').classList.remove('hidden');
+  var qmap={approval:'你能不能，哪怕只是一点点，放下对"不被认可"的恐惧？',control:'你能不能，哪怕只是一点点，放下对"失控"的恐惧？',security:'你能不能，哪怕只是一点点，放下对"不安全/失去"的恐惧？',other:'你能不能，哪怕只是一点点，放下这个担心？'};
+  document.getElementById('gg-B-qtitle').textContent='关于"'+ggWantLabels[key]+'"……';
+  document.getElementById('gg-B-q1').textContent=qmap[key];
+}
+function ggAnswerA(ans){
+  var el=document.getElementById('gg-A-resp');
+  el.innerHTML='<div class="card-body">'+ggRelResp[ans]+'</div>';el.classList.remove('hidden');
+  G.goalSideA=document.getElementById('goal-sideA-desc').value;
+  if(G.goalWantA==='other')G.goalWantALabel=document.getElementById('gg-wantA-other').value||'其他';
+  setTimeout(function(){ggGoStep(5);},1600);
+}
+function ggAnswerB(ans){
+  var el=document.getElementById('gg-B-resp');
+  el.innerHTML='<div class="card-body">'+ggRelResp[ans]+'</div>';el.classList.remove('hidden');
+  G.goalSideB=document.getElementById('goal-sideB-desc').value;
+  if(G.goalWantB==='other')G.goalWantBLabel=document.getElementById('gg-wantB-other').value||'其他';
+  setTimeout(function(){ggGoStep(8);},1600);
+}
+
+// ════════ RECORDS ════════
+function saveRecord(rec){
+  var all=loadRecords(); all.unshift(rec);
+  if(all.length>300)all=all.slice(0,300);
+  try{localStorage.setItem('release_records',JSON.stringify(all));}catch(e){}
+}
+function loadRecords(){try{var d=localStorage.getItem('release_records');return d?JSON.parse(d):[];}catch(e){return[];}}
+function formatDate(iso){
+  var d=new Date(iso),now=new Date(),diff=Math.floor((now-d)/1000);
+  if(diff<60)return '刚刚'; if(diff<3600)return Math.floor(diff/60)+'分钟前';
+  if(diff<86400)return Math.floor(diff/3600)+'小时前'; if(diff<86400*7)return Math.floor(diff/86400)+'天前';
+  return d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate();
+}
+var wantNames={approval:'想要认可',control:'想要控制',security:'想要安全感',other:'其他'};
+var modeNames={regular:'常规释放',goal:'目标双面',ai:'AI 对话'};
+function renderRecords(){
+  var all=loadRecords();
+  var container=document.getElementById('records-container');
+  if(all.length===0){container.innerHTML='<div class="empty-state"><div class="empty-icon">📖</div><div class="empty-text">还没有释放记录<br>完成一次练习后会自动保存在这里</div></div>';return;}
+  var grouped={};
+  all.forEach(function(r){
+    var d=new Date(r.date);var key=d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate();
+    if(!grouped[key])grouped[key]=[];grouped[key].push(r);
+  });
+  var html='';
+  Object.keys(grouped).forEach(function(dateKey){
+    html+='<div class="section-header">'+dateKey+'</div><div class="rec-list">';
+    grouped[dateKey].forEach(function(r){
+      var bc=r.mode==='regular'?'badge-regular':(r.mode==='goal'?'badge-goal':'badge-ai');
+      var content='',sub='';
+      if(r.mode==='regular'){content=r.emotion||'情绪释放';sub=r.want?'想要：'+wantNames[r.want]:'';}
+      else if(r.mode==='goal'){content=r.goalText?(r.goalText.substring(0,40)+(r.goalText.length>40?'…':'')):'目标释放';var pts=[];if(r.sideA&&r.sideA.wantLabel)pts.push('正面：'+r.sideA.wantLabel);if(r.sideB&&r.sideB.wantLabel)pts.push('反面：'+r.sideB.wantLabel);sub=pts.join(' · ');}
+      else{content=r.summary||'AI 对话';sub='';}
+      var did='detail-'+r.id;
+      var dh='';
+      if(r.mode==='goal'){if(r.sideA&&r.sideA.desc)dh+='<div class="rec-detail-row"><span class="rec-detail-label">正面感受：</span>'+r.sideA.desc+'</div>';if(r.sideB&&r.sideB.desc)dh+='<div class="rec-detail-row"><span class="rec-detail-label">反面感受：</span>'+r.sideB.desc+'</div>';}
+      html+='<div class="rec-item" onclick="toggleDetail(\''+did+'\')"><div class="rec-header"><span class="rec-date">'+formatDate(r.date)+'</span><span class="rec-mode-badge '+bc+'">'+modeNames[r.mode]+'</span></div><div class="rec-content">'+content+'</div>'+(sub?'<div class="rec-sub">'+sub+'</div>':'')+(dh?'<div class="rec-detail" id="'+did+'">'+dh+'</div>':'')+'</div>';
+    });
+    html+='</div>';
+  });
+  container.innerHTML=html;
+}
+function toggleDetail(id){var el=document.getElementById(id);if(el)el.classList.toggle('open');}
+
+// ════════ AI CHAT ════════
+var chatHistory=[];
+var sysPrompt='你是一位温柔、智慧的释放引导师，深入研究 Lester Levenson 的释放法。通过文字对话温和引导用户识别和释放内在情绪。\n\n核心原则：\n- 释放不是压抑、分析或表达，而是允许感受存在然后轻轻放下\n- 所有痛苦源自三种"想要"：想要认可、想要控制、想要安全感\n- 情绪是能量不是事实；你不等于你的感受\n- 卡住时，把"卡住"本身作为新的释放对象\n\n对话风格：\n- 中文回复，温暖简洁，不冗长\n- 先共情再引导，不急于给建议\n- 用苏格拉底式问题引导深入感受\n- 适时引入：1.我能允许这个感受吗？2.我能放下吗？3.我愿意吗？\n- 每条回复150字以内';
+
+function initChat(){
+  updateModelBadge();addAiMsg('你好，我在这里陪你。\n\n此刻你内心有什么？可以只是一个词，也可以是一段话——随你。');}
+function addAiMsg(text){var w=document.createElement('div');w.className='msg ai';w.innerHTML='<div class="ai-name">释放引导</div><div class="bubble">'+text.replace(/\n/g,'<br>')+'</div>';document.getElementById('chat-messages').appendChild(w);scrollChat();}
+function addUserMsg(text){var w=document.createElement('div');w.className='msg user';w.innerHTML='<div class="bubble">'+text.replace(/\n/g,'<br>')+'</div>';document.getElementById('chat-messages').appendChild(w);scrollChat();}
+function addThinking(){var w=document.createElement('div');w.className='msg ai';w.id='thinking-msg';w.innerHTML='<div class="ai-name">释放引导</div><div class="bubble thinking">正在感受……</div>';document.getElementById('chat-messages').appendChild(w);scrollChat();}
+function scrollChat(){var c=document.getElementById('chat-messages');c.scrollTo({top:c.scrollHeight,behavior:'smooth'});}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
+function chatEnter(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
+async function sendChat(){
+  var input=document.getElementById('chat-input');var text=input.value.trim();if(!text)return;
+  input.value='';input.style.height='auto';
+  document.getElementById('send-btn').disabled=true;
+  addUserMsg(text);chatHistory.push({role:'user',content:text});addThinking();
+  try{
+    var apiKey = getApiKey();
+    if(!apiKey){
+      var t=document.getElementById('thinking-msg');if(t)t.remove();
+      addAiMsg('还没有设置 API Key。点右上角 ⚙ 设置填入后就可以对话了。');
+      document.getElementById('send-btn').disabled=false;
+      return;
+    }
+    var reply='';
+    var messages=[{role:'system',content:sysPrompt}].concat(chatHistory);
+    if(selectedModel==='claude'){
+      // Claude uses different API format
+      var resp=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1000,system:sysPrompt,messages:chatHistory})
+      });
+      var data=await resp.json();
+      if(data.error){
+        var t=document.getElementById('thinking-msg');if(t)t.remove();
+        addAiMsg('请求出错：'+(data.error.message||'请检查 API Key，或确认 VPN 已开启'));
+        document.getElementById('send-btn').disabled=false;
+        return;
+      }
+      reply=data.content&&data.content[0]&&data.content[0].text?data.content[0].text:'我在这里。能再说说吗？';
+    } else {
+      // DeepSeek & Kimi both use OpenAI-compatible format
+      var endpoints={deepseek:'https://api.deepseek.com/chat/completions',kimi:'https://api.moonshot.cn/v1/chat/completions'};
+      var models={deepseek:'deepseek-chat',kimi:'moonshot-v1-8k'};
+      var resp=await fetch(endpoints[selectedModel],{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+        body:JSON.stringify({model:models[selectedModel],max_tokens:1000,messages:messages})
+      });
+      var data=await resp.json();
+      if(data.error){
+        var t=document.getElementById('thinking-msg');if(t)t.remove();
+        addAiMsg('请求出错：'+(data.error.message||'请检查 API Key 是否正确'));
+        document.getElementById('send-btn').disabled=false;
+        return;
+      }
+      reply=data.choices&&data.choices[0]&&data.choices[0].message?data.choices[0].message.content:'我在这里。能再说说吗？';
+    }
+    var t=document.getElementById('thinking-msg');if(t)t.remove();
+    addAiMsg(reply);chatHistory.push({role:'assistant',content:reply});
+    if(chatHistory.length===2)saveRecord({id:Date.now(),date:new Date().toISOString(),mode:'ai',summary:text.substring(0,40),notes:''});
+  }catch(e){
+    var t=document.getElementById('thinking-msg');if(t)t.remove();
+    addAiMsg('网络连接出错，请检查网络后再试。');
+  }
+  document.getElementById('send-btn').disabled=false;
+}
+</script>
+
+<audio id="audio-ocean" loop preload="auto" style="display:none"><source src="./ocean.mp4" type="audio/mp4"></audio>
+<audio id="audio-fire" loop preload="auto" style="display:none"><source src="./fire.mp4" type="audio/mp4"></audio>
+</body>
+</html>
