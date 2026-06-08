@@ -593,6 +593,22 @@ html[data-theme="ocean"] body{background:#F0F7FA;}
   transition:background .18s;font-family:'DM Sans',sans-serif;
 }
 .ai-settings-btn:hover{background:var(--bg-surface2);}
+
+/* ── Sound toggle ── */
+.sound-btn{
+  width:38px;height:38px;border-radius:12px;
+  background:var(--bg-surface2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:16px;transition:all .25s;
+  flex-shrink:0;position:relative;
+}
+.sound-btn:active{transform:scale(.93);}
+.sound-btn.on{background:var(--accent-light);border-color:var(--accent-mid);}
+.sound-btn.on::after{
+  content:'';position:absolute;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);bottom:6px;right:6px;
+}
 </style>
 </head>
 <body>
@@ -651,6 +667,7 @@ html[data-theme="ocean"] body{background:#F0F7FA;}
   <div class="header-row">
     <div class="logo">释放 <em>Release</em></div>
     <div class="header-right">
+      <button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="白噪音">🔇</button>
       <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="切换主题">🌊</button>
       <div class="nav-tabs">
         <button class="nav-btn active" onclick="switchTab('home')">练习</button>
@@ -924,6 +941,7 @@ function applyTheme(t){
   document.getElementById('theme-btn').textContent = t==='ocean' ? '🌊' : '✦';
   if(t==='night'){ stopOcean(); generateStars(); }
   else { clearStars(); startOcean(); }
+  if(soundOn) startAmbientSound();
   localStorage.setItem('release_theme',t);
 }
 function toggleTheme(){
@@ -987,6 +1005,12 @@ function startOcean(){
 }
 
 applyTheme(currentTheme);
+// restore sound preference
+if(localStorage.getItem('release_sound')==='1'){
+  soundOn=true;
+  var sb=document.getElementById('sound-btn');
+  if(sb){sb.textContent='🔊';sb.classList.add('on');}
+}
 
 // ════════ API KEY & MODEL ════════
 var selectedModel = localStorage.getItem('release_model') || 'deepseek';
@@ -1059,6 +1083,183 @@ function maybePromptApiKey(){
   if(!getApiKey()){
     setTimeout(function(){ showApiKeyOverlay(); }, 300);
   }
+}
+
+
+// ════════ WHITE NOISE / AMBIENT SOUND ════════
+var audioCtx = null;
+var soundNodes = [];
+var soundOn = false;
+
+function initAudio(){
+  if(audioCtx) return;
+  try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
+}
+
+function stopSound(){
+  soundNodes.forEach(function(n){ try{n.stop();}catch(e){} try{n.disconnect();}catch(e){} });
+  soundNodes=[];
+}
+
+function startOceanSound(){
+  if(!audioCtx) return;
+  stopSound();
+  var master = audioCtx.createGain();
+  master.gain.setValueAtTime(0, audioCtx.currentTime);
+  master.gain.linearRampToValueAtTime(0.18, audioCtx.currentTime+2);
+  master.connect(audioCtx.destination);
+
+  // Pink-ish noise buffer (2s looping) — base for waves
+  function makeNoise(dur){
+    var buf = audioCtx.createBuffer(1, audioCtx.sampleRate*dur, audioCtx.sampleRate);
+    var d = buf.getChannelData(0);
+    var b0=0,b1=0,b2=0,b3=0,b4=0,b5=0;
+    for(var i=0;i<d.length;i++){
+      var w=Math.random()*2-1;
+      b0=0.99886*b0+w*0.0555179; b1=0.99332*b1+w*0.0750759;
+      b2=0.96900*b2+w*0.1538520; b3=0.86650*b3+w*0.3104856;
+      b4=0.55000*b4+w*0.5329522; b5=-0.7616*b5-w*0.0168980;
+      d[i]=(b0+b1+b2+b3+b4+b5+w*0.5362)*0.11;
+    }
+    return buf;
+  }
+
+  // Main noise source
+  var src = audioCtx.createBufferSource();
+  src.buffer = makeNoise(3);
+  src.loop = true;
+
+  // Low pass — cuts high freq, keeps rumble
+  var lp = audioCtx.createBiquadFilter();
+  lp.type='lowpass'; lp.frequency.value=420; lp.Q.value=0.8;
+
+  // LFO for wave swell rhythm (~8s cycle)
+  var lfo = audioCtx.createOscillator();
+  lfo.frequency.value = 0.12;
+  var lfoGain = audioCtx.createGain();
+  lfoGain.gain.value = 0.12;
+  var waveGain = audioCtx.createGain();
+  waveGain.gain.value = 0.8;
+  lfo.connect(lfoGain);
+  lfoGain.connect(waveGain.gain);
+
+  src.connect(lp);
+  lp.connect(waveGain);
+  waveGain.connect(master);
+
+  // Second noise layer — higher, for foam/hiss
+  var src2 = audioCtx.createBufferSource();
+  src2.buffer = makeNoise(2);
+  src2.loop = true;
+  var hp = audioCtx.createBiquadFilter();
+  hp.type='bandpass'; hp.frequency.value=1200; hp.Q.value=0.5;
+  var hissGain = audioCtx.createGain();
+  hissGain.gain.value = 0.04;
+
+  // LFO2 slightly offset phase
+  var lfo2 = audioCtx.createOscillator();
+  lfo2.frequency.value = 0.09;
+  var lfoGain2 = audioCtx.createGain();
+  lfoGain2.gain.value = 0.03;
+  lfo2.connect(lfoGain2);
+  lfoGain2.connect(hissGain.gain);
+
+  src2.connect(hp);
+  hp.connect(hissGain);
+  hissGain.connect(master);
+
+  src.start(); src2.start(); lfo.start(); lfo2.start();
+  soundNodes=[src,src2,lfo,lfo2,master,lfoGain,lfoGain2,waveGain,hissGain,lp,hp];
+}
+
+function startFireSound(){
+  if(!audioCtx) return;
+  stopSound();
+  var master = audioCtx.createGain();
+  master.gain.setValueAtTime(0, audioCtx.currentTime);
+  master.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime+1.5);
+  master.connect(audioCtx.destination);
+
+  function makeNoise(dur){
+    var buf = audioCtx.createBuffer(1, audioCtx.sampleRate*dur, audioCtx.sampleRate);
+    var d = buf.getChannelData(0);
+    for(var i=0;i<d.length;i++) d[i]=Math.random()*2-1;
+    return buf;
+  }
+
+  // Base crackle — raw white noise through bandpass
+  var src = audioCtx.createBufferSource();
+  src.buffer = makeNoise(2);
+  src.loop = true;
+  var bp = audioCtx.createBiquadFilter();
+  bp.type='bandpass'; bp.frequency.value=800; bp.Q.value=0.4;
+  var baseGain = audioCtx.createGain();
+  baseGain.gain.value = 0.3;
+  src.connect(bp); bp.connect(baseGain); baseGain.connect(master);
+
+  // Low rumble
+  var src2 = audioCtx.createBufferSource();
+  src2.buffer = makeNoise(3);
+  src2.loop = true;
+  var lp = audioCtx.createBiquadFilter();
+  lp.type='lowpass'; lp.frequency.value=180; lp.Q.value=1.2;
+  var rumbleGain = audioCtx.createGain();
+  rumbleGain.gain.value = 0.55;
+  src2.connect(lp); lp.connect(rumbleGain); rumbleGain.connect(master);
+
+  // Slow flutter LFO — fire breathes
+  var lfo = audioCtx.createOscillator();
+  lfo.type='sine'; lfo.frequency.value=0.22;
+  var lfoG = audioCtx.createGain();
+  lfoG.gain.value=0.08;
+  lfo.connect(lfoG); lfoG.connect(baseGain.gain);
+
+  // Crackle pops — random gain modulation
+  var lfo2 = audioCtx.createOscillator();
+  lfo2.type='sawtooth'; lfo2.frequency.value=3.7;
+  var lfoG2 = audioCtx.createGain();
+  lfoG2.gain.value=0.06;
+  lfo2.connect(lfoG2); lfoG2.connect(rumbleGain.gain);
+
+  // Warmth — subtle high shelf cut
+  var shelf = audioCtx.createBiquadFilter();
+  shelf.type='highshelf'; shelf.frequency.value=3000; shelf.gain.value=-12;
+  master.disconnect();
+  master.connect(shelf); shelf.connect(audioCtx.destination);
+
+  src.start(); src2.start(); lfo.start(); lfo2.start();
+  soundNodes=[src,src2,lfo,lfo2,master,baseGain,rumbleGain,lfoG,lfoG2,bp,lp,shelf];
+}
+
+function startAmbientSound(){
+  if(!soundOn) return;
+  initAudio();
+  if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
+  if(currentTheme==='ocean') startOceanSound();
+  else startFireSound();
+}
+
+function toggleSound(){
+  initAudio();
+  if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
+  soundOn = !soundOn;
+  var btn = document.getElementById('sound-btn');
+  if(soundOn){
+    btn.textContent='🔊';
+    btn.classList.add('on');
+    startAmbientSound();
+  } else {
+    btn.textContent='🔇';
+    btn.classList.remove('on');
+    // fade out
+    if(audioCtx){
+      soundNodes.forEach(function(n){
+        if(n.gain) n.gain.linearRampToValueAtTime(0, audioCtx.currentTime+1.2);
+      });
+      setTimeout(stopSound, 1300);
+    }
+  }
+  localStorage.setItem('release_sound', soundOn?'1':'0');
 }
 
 // ════════ STATE ════════
