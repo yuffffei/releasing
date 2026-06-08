@@ -607,11 +607,15 @@ html[data-theme="ocean"] body{background:#F0F7FA;}
     <div class="model-tabs">
       <div class="model-tab active" id="tab-deepseek" onclick="selectModel('deepseek')">
         <span class="model-name">DeepSeek</span>
-        <span class="model-sub">价格低·推荐</span>
+        <span class="model-sub">推荐·可直连</span>
+      </div>
+      <div class="model-tab" id="tab-kimi" onclick="selectModel('kimi')">
+        <span class="model-name">Kimi</span>
+        <span class="model-sub">可直连</span>
       </div>
       <div class="model-tab" id="tab-claude" onclick="selectModel('claude')">
         <span class="model-name">Claude</span>
-        <span class="model-sub">Anthropic</span>
+        <span class="model-sub">需要VPN</span>
       </div>
     </div>
     <div class="apikey-label" id="key-label">DeepSeek API Key</div>
@@ -991,13 +995,19 @@ var modelConfig = {
   deepseek: {
     name: 'DeepSeek',
     placeholder: 'sk-...',
-    hint: '获取 Key：<a href="https://platform.deepseek.com" target="_blank">platform.deepseek.com</a>',
+    hint: '无需 VPN 可直连。获取 Key：<a href="https://platform.deepseek.com" target="_blank">platform.deepseek.com</a>',
     keyLabel: 'DeepSeek API Key',
+  },
+  kimi: {
+    name: 'Kimi',
+    placeholder: 'sk-...',
+    hint: '无需 VPN 可直连。获取 Key：<a href="https://platform.moonshot.cn" target="_blank">platform.moonshot.cn</a>',
+    keyLabel: 'Kimi API Key',
   },
   claude: {
     name: 'Claude',
     placeholder: 'sk-ant-...',
-    hint: '获取 Key：<a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>',
+    hint: '需要 VPN 才能访问。获取 Key：<a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>',
     keyLabel: 'Claude API Key',
   },
 };
@@ -1418,12 +1428,30 @@ async function sendChat(){
       return;
     }
     var reply='';
-    if(selectedModel==='deepseek'){
-      var messages=[{role:'system',content:sysPrompt}].concat(chatHistory);
-      var resp=await fetch('https://api.deepseek.com/chat/completions',{
+    var messages=[{role:'system',content:sysPrompt}].concat(chatHistory);
+    if(selectedModel==='claude'){
+      // Claude uses different API format
+      var resp=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1000,system:sysPrompt,messages:chatHistory})
+      });
+      var data=await resp.json();
+      if(data.error){
+        var t=document.getElementById('thinking-msg');if(t)t.remove();
+        addAiMsg('请求出错：'+(data.error.message||'请检查 API Key，或确认 VPN 已开启'));
+        document.getElementById('send-btn').disabled=false;
+        return;
+      }
+      reply=data.content&&data.content[0]&&data.content[0].text?data.content[0].text:'我在这里。能再说说吗？';
+    } else {
+      // DeepSeek & Kimi both use OpenAI-compatible format
+      var endpoints={deepseek:'https://api.deepseek.com/chat/completions',kimi:'https://api.moonshot.cn/v1/chat/completions'};
+      var models={deepseek:'deepseek-chat',kimi:'moonshot-v1-8k'};
+      var resp=await fetch(endpoints[selectedModel],{
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
-        body:JSON.stringify({model:'deepseek-chat',max_tokens:1000,messages:messages})
+        body:JSON.stringify({model:models[selectedModel],max_tokens:1000,messages:messages})
       });
       var data=await resp.json();
       if(data.error){
@@ -1433,20 +1461,6 @@ async function sendChat(){
         return;
       }
       reply=data.choices&&data.choices[0]&&data.choices[0].message?data.choices[0].message.content:'我在这里。能再说说吗？';
-    } else {
-      var resp=await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-        body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1000,system:sysPrompt,messages:chatHistory})
-      });
-      var data=await resp.json();
-      if(data.error){
-        var t=document.getElementById('thinking-msg');if(t)t.remove();
-        addAiMsg('请求出错：'+(data.error.message||'请检查 API Key 是否正确'));
-        document.getElementById('send-btn').disabled=false;
-        return;
-      }
-      reply=data.content&&data.content[0]&&data.content[0].text?data.content[0].text:'我在这里。能再说说吗？';
     }
     var t=document.getElementById('thinking-msg');if(t)t.remove();
     addAiMsg(reply);chatHistory.push({role:'assistant',content:reply});
