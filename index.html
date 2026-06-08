@@ -550,6 +550,19 @@ html[data-theme="ocean"] body{background:#F0F7FA;}
 .apikey-logo em{font-style:italic;color:var(--accent);}
 .apikey-title{font-size:14px;color:var(--text-mid);line-height:1.65;margin-bottom:20px;}
 .apikey-label{font-size:11px;font-weight:500;color:var(--text-soft);letter-spacing:.07em;text-transform:uppercase;margin-bottom:7px;}
+/* model selector */
+.model-tabs{display:flex;gap:8px;margin-bottom:18px;}
+.model-tab{
+  flex:1;padding:10px 8px;border-radius:var(--radius-sm);
+  border:1.5px solid var(--border);background:var(--bg-surface2);
+  color:var(--text-soft);font-size:13px;font-weight:500;
+  font-family:'DM Sans',sans-serif;cursor:pointer;text-align:center;
+  transition:all .18s;
+}
+.model-tab:active{transform:scale(.98);}
+.model-tab.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent-dark);}
+.model-name{font-size:13px;font-weight:500;display:block;margin-bottom:2px;}
+.model-sub{font-size:11px;opacity:.7;display:block;}
 .apikey-input{
   width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);
   padding:13px 14px;font-size:14px;font-family:'DM Sans',sans-serif;
@@ -563,12 +576,17 @@ html[data-theme="ocean"] body{background:#F0F7FA;}
 .apikey-hint a{color:var(--accent);text-decoration:none;}
 .apikey-skip{font-size:12.5px;color:var(--text-soft);text-align:center;margin-top:10px;cursor:pointer;}
 .apikey-skip:hover{color:var(--text-mid);}
-/* settings gear in AI tab */
+/* settings in AI tab */
 .ai-header{
   display:flex;align-items:center;justify-content:space-between;
   padding:10px 16px 0;flex-shrink:0;
 }
+.ai-header-left{display:flex;align-items:center;gap:8px;}
 .ai-header-title{font-size:13px;font-weight:500;color:var(--text-soft);letter-spacing:.04em;}
+.ai-model-badge{
+  font-size:10px;font-weight:500;padding:3px 8px;border-radius:20px;
+  background:var(--accent-light);color:var(--accent-dark);
+}
 .ai-settings-btn{
   font-size:12px;color:var(--text-soft);background:none;border:none;
   cursor:pointer;padding:6px 10px;border-radius:10px;
@@ -584,15 +602,26 @@ html[data-theme="ocean"] body{background:#F0F7FA;}
 <div class="apikey-overlay" id="apikey-overlay" style="display:none">
   <div class="apikey-sheet">
     <div class="apikey-logo">释放 <em>Release</em></div>
-    <div class="apikey-title" style="margin-top:6px">AI 对话功能需要连接 Anthropic API。<br>请输入你的 API Key 以启用。</div>
-    <div class="apikey-label">Anthropic API Key</div>
-    <input class="apikey-input" id="apikey-input" type="password" placeholder="sk-ant-..." autocomplete="off" autocorrect="off" spellcheck="false">
-    <div class="apikey-hint">
-      Key 仅保存在你的手机本地，不会上传任何地方。<br>
-      还没有 Key？前往 <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> 获取。
+    <div class="apikey-title" style="margin-top:6px">选择 AI 模型并填入对应的 API Key。</div>
+    <div class="apikey-label">选择模型</div>
+    <div class="model-tabs">
+      <div class="model-tab active" id="tab-deepseek" onclick="selectModel('deepseek')">
+        <span class="model-name">DeepSeek</span>
+        <span class="model-sub">价格低·推荐</span>
+      </div>
+      <div class="model-tab" id="tab-claude" onclick="selectModel('claude')">
+        <span class="model-name">Claude</span>
+        <span class="model-sub">Anthropic</span>
+      </div>
     </div>
-    <button class="btn-primary" onclick="saveApiKey()">保存并启用 AI 对话</button>
-    <div class="apikey-skip" onclick="skipApiKey()">暂时跳过，只用引导功能</div>
+    <div class="apikey-label" id="key-label">DeepSeek API Key</div>
+    <input class="apikey-input" id="apikey-input" type="password" placeholder="sk-..." autocomplete="off" autocorrect="off" spellcheck="false">
+    <div class="apikey-hint" id="key-hint">
+      Key 仅保存在本地，不会上传任何地方。<br>
+      获取 Key：<a href="https://platform.deepseek.com" target="_blank" id="key-link">platform.deepseek.com</a>
+    </div>
+    <button class="btn-primary" onclick="saveApiKey()">保存并启用</button>
+    <div class="apikey-skip" onclick="skipApiKey()">暂时跳过</div>
   </div>
 </div>
 
@@ -862,8 +891,11 @@ html[data-theme="ocean"] body{background:#F0F7FA;}
 <!-- ══ AI CHAT ══ -->
 <div id="screen-ai" class="screen" style="flex-direction:column">
   <div class="ai-header">
-    <span class="ai-header-title">AI 释放对话</span>
-    <button class="ai-settings-btn" onclick="showApiKeyOverlay()">⚙ API Key</button>
+    <div class="ai-header-left">
+      <span class="ai-header-title">AI 释放对话</span>
+      <span class="ai-model-badge" id="ai-model-badge">DeepSeek</span>
+    </div>
+    <button class="ai-settings-btn" onclick="showApiKeyOverlay()">⚙ 设置</button>
   </div>
   <div class="chat-messages" id="chat-messages"></div>
   <div class="chat-input-wrap">
@@ -952,18 +984,48 @@ function startOcean(){
 
 applyTheme(currentTheme);
 
-// ════════ API KEY ════════
-function getApiKey(){ return localStorage.getItem('release_apikey')||''; }
+// ════════ API KEY & MODEL ════════
+var selectedModel = localStorage.getItem('release_model') || 'deepseek';
+
+var modelConfig = {
+  deepseek: {
+    name: 'DeepSeek',
+    placeholder: 'sk-...',
+    hint: '获取 Key：<a href="https://platform.deepseek.com" target="_blank">platform.deepseek.com</a>',
+    keyLabel: 'DeepSeek API Key',
+  },
+  claude: {
+    name: 'Claude',
+    placeholder: 'sk-ant-...',
+    hint: '获取 Key：<a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>',
+    keyLabel: 'Claude API Key',
+  },
+};
+
+function getApiKey(){
+  return localStorage.getItem('release_apikey_'+selectedModel)||'';
+}
+
+function selectModel(m){
+  selectedModel = m;
+  document.querySelectorAll('.model-tab').forEach(function(t){t.classList.remove('active');});
+  document.getElementById('tab-'+m).classList.add('active');
+  var cfg = modelConfig[m];
+  document.getElementById('key-label').textContent = cfg.keyLabel;
+  document.getElementById('apikey-input').placeholder = cfg.placeholder;
+  document.getElementById('key-hint').innerHTML = 'Key 仅保存在本地，不会上传任何地方。<br>'+cfg.hint;
+  // load existing key for this model
+  var existing = localStorage.getItem('release_apikey_'+m)||'';
+  document.getElementById('apikey-input').value = existing;
+}
 
 function saveApiKey(){
   var val = document.getElementById('apikey-input').value.trim();
   if(!val){ alert('请输入有效的 API Key'); return; }
-  if(!val.startsWith('sk-')){
-    if(!confirm('Key 格式看起来不太对，确定要保存吗？')) return;
-  }
-  localStorage.setItem('release_apikey', val);
+  localStorage.setItem('release_apikey_'+selectedModel, val);
+  localStorage.setItem('release_model', selectedModel);
   document.getElementById('apikey-overlay').style.display='none';
-  // re-init chat with new key
+  updateModelBadge();
   document.getElementById('chat-messages').innerHTML='';
   initChat();
 }
@@ -973,12 +1035,16 @@ function skipApiKey(){
 }
 
 function showApiKeyOverlay(){
-  var existing = getApiKey();
-  if(existing) document.getElementById('apikey-input').value=existing;
+  // restore current model tab
+  selectModel(selectedModel);
   document.getElementById('apikey-overlay').style.display='flex';
 }
 
-// Show on first open to AI tab if no key saved
+function updateModelBadge(){
+  var badge = document.getElementById('ai-model-badge');
+  if(badge) badge.textContent = modelConfig[selectedModel].name;
+}
+
 function maybePromptApiKey(){
   if(!getApiKey()){
     setTimeout(function(){ showApiKeyOverlay(); }, 300);
@@ -1330,7 +1396,8 @@ function toggleDetail(id){var el=document.getElementById(id);if(el)el.classList.
 var chatHistory=[];
 var sysPrompt='你是一位温柔、智慧的释放引导师，深入研究 Lester Levenson 的释放法。通过文字对话温和引导用户识别和释放内在情绪。\n\n核心原则：\n- 释放不是压抑、分析或表达，而是允许感受存在然后轻轻放下\n- 所有痛苦源自三种"想要"：想要认可、想要控制、想要安全感\n- 情绪是能量不是事实；你不等于你的感受\n- 卡住时，把"卡住"本身作为新的释放对象\n\n对话风格：\n- 中文回复，温暖简洁，不冗长\n- 先共情再引导，不急于给建议\n- 用苏格拉底式问题引导深入感受\n- 适时引入：1.我能允许这个感受吗？2.我能放下吗？3.我愿意吗？\n- 每条回复150字以内';
 
-function initChat(){addAiMsg('你好，我在这里陪你。\n\n此刻你内心有什么？可以只是一个词，也可以是一段话——随你。');}
+function initChat(){
+  updateModelBadge();addAiMsg('你好，我在这里陪你。\n\n此刻你内心有什么？可以只是一个词，也可以是一段话——随你。');}
 function addAiMsg(text){var w=document.createElement('div');w.className='msg ai';w.innerHTML='<div class="ai-name">释放引导</div><div class="bubble">'+text.replace(/\n/g,'<br>')+'</div>';document.getElementById('chat-messages').appendChild(w);scrollChat();}
 function addUserMsg(text){var w=document.createElement('div');w.className='msg user';w.innerHTML='<div class="bubble">'+text.replace(/\n/g,'<br>')+'</div>';document.getElementById('chat-messages').appendChild(w);scrollChat();}
 function addThinking(){var w=document.createElement('div');w.className='msg ai';w.id='thinking-msg';w.innerHTML='<div class="ai-name">释放引导</div><div class="bubble thinking">正在感受……</div>';document.getElementById('chat-messages').appendChild(w);scrollChat();}
@@ -1346,24 +1413,41 @@ async function sendChat(){
     var apiKey = getApiKey();
     if(!apiKey){
       var t=document.getElementById('thinking-msg');if(t)t.remove();
-      addAiMsg('还没有设置 API Key。点右上角 ⚙ API Key 填入后就可以对话了。');
+      addAiMsg('还没有设置 API Key。点右上角 ⚙ 设置填入后就可以对话了。');
       document.getElementById('send-btn').disabled=false;
       return;
     }
-    var resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sysPrompt,messages:chatHistory})
-    });
-    var data=await resp.json();
-    if(data.error){
-      var t=document.getElementById('thinking-msg');if(t)t.remove();
-      var msg=data.error.type==='authentication_error'?'API Key 无效或已过期，请点 ⚙ API Key 重新设置。':'请求出错：'+data.error.message;
-      addAiMsg(msg);
-      document.getElementById('send-btn').disabled=false;
-      return;
+    var reply='';
+    if(selectedModel==='deepseek'){
+      var messages=[{role:'system',content:sysPrompt}].concat(chatHistory);
+      var resp=await fetch('https://api.deepseek.com/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey},
+        body:JSON.stringify({model:'deepseek-chat',max_tokens:1000,messages:messages})
+      });
+      var data=await resp.json();
+      if(data.error){
+        var t=document.getElementById('thinking-msg');if(t)t.remove();
+        addAiMsg('请求出错：'+(data.error.message||'请检查 API Key 是否正确'));
+        document.getElementById('send-btn').disabled=false;
+        return;
+      }
+      reply=data.choices&&data.choices[0]&&data.choices[0].message?data.choices[0].message.content:'我在这里。能再说说吗？';
+    } else {
+      var resp=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1000,system:sysPrompt,messages:chatHistory})
+      });
+      var data=await resp.json();
+      if(data.error){
+        var t=document.getElementById('thinking-msg');if(t)t.remove();
+        addAiMsg('请求出错：'+(data.error.message||'请检查 API Key 是否正确'));
+        document.getElementById('send-btn').disabled=false;
+        return;
+      }
+      reply=data.content&&data.content[0]&&data.content[0].text?data.content[0].text:'我在这里。能再说说吗？';
     }
-    var reply=data.content&&data.content[0]&&data.content[0].text?data.content[0].text:'我在这里。能再说说吗？';
     var t=document.getElementById('thinking-msg');if(t)t.remove();
     addAiMsg(reply);chatHistory.push({role:'assistant',content:reply});
     if(chatHistory.length===2)saveRecord({id:Date.now(),date:new Date().toISOString(),mode:'ai',summary:text.substring(0,40),notes:''});
