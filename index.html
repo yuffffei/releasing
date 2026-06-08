@@ -3,13 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="释放">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#F0F7FA" id="theme-color-meta">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
 <title>释放 · Release</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
 <style>
@@ -893,8 +886,6 @@ function applyTheme(t){
   document.documentElement.setAttribute('data-theme',t);
   document.body.style.background = t==='night' ? '#0D1117' : '#F0F7FA';
   document.getElementById('theme-btn').textContent = t==='ocean' ? '🌊' : '✦';
-  var metaTheme = document.getElementById('theme-color-meta');
-  if(metaTheme) metaTheme.setAttribute('content', t==='night'?'#0D1117':'#F0F7FA');
   if(t==='night'){ stopOcean(); generateStars(); }
   else { clearStars(); startOcean(); }
   localStorage.setItem('release_theme',t);
@@ -1145,7 +1136,7 @@ function resetRegular(){
   G.rrEmo=null;G.rrEmoName='';G.rrWant=null;G.rrQIdx=0;
   G.rrBreathRunning=false; rrBreathCfg.phase=0;
   if(rrBreathCfg.timer)clearTimeout(rrBreathCfg.timer);
-  document.querySelectorAll('[id^="rr-"]').forEach(function(e){e.classList.add('hidden');});
+  for(var _i=0;_i<=6;_i++){var _s=document.getElementById('rr-'+_i);if(_s)_s.classList.add('hidden');}
   document.querySelectorAll('#screen-regular .emo-btn').forEach(function(b){b.classList.remove('sel');});
   document.getElementById('emo-next').classList.add('hidden');
   document.getElementById('rr-0').classList.remove('hidden');
@@ -1163,7 +1154,7 @@ function pickEmo(btn,key,name){
   document.getElementById('emo-next').classList.remove('hidden');
 }
 function rrGoStep(n){
-  document.querySelectorAll('[id^="rr-"]').forEach(function(e){e.classList.add('hidden');});
+  for(var _i=0;_i<=6;_i++){var _s=document.getElementById('rr-'+_i);if(_s)_s.classList.add('hidden');}
   var el=document.getElementById('rr-'+n);
   if(el){el.classList.remove('hidden');renderPB('rrpb-'+n,n,rrTotalSteps);}
   document.getElementById('regular-scroll').scrollTo({top:0,behavior:'smooth'});
@@ -1230,7 +1221,7 @@ function resetGoal(){
   G.goalSideB='';G.goalWantB=null;G.goalWantBLabel='';
   G.ggBreathRunning=false;ggBreathCfg.phase=0;
   if(ggBreathCfg.timer)clearTimeout(ggBreathCfg.timer);
-  document.querySelectorAll('[id^="gg-"]').forEach(function(e){e.classList.add('hidden');});
+  for(var _i=0;_i<=8;_i++){var _s=document.getElementById('gg-'+_i);if(_s)_s.classList.add('hidden');}
   document.getElementById('gg-0').classList.remove('hidden');
   document.getElementById('goal-input').value='';
   document.getElementById('goal-sideA-desc').value='';
@@ -1245,7 +1236,7 @@ function startGoal(){
   G.goalText=txt; ggGoStep(1);
 }
 function ggGoStep(n){
-  document.querySelectorAll('[id^="gg-"]').forEach(function(e){e.classList.add('hidden');});
+  for(var _i=0;_i<=8;_i++){var _s=document.getElementById('gg-'+_i);if(_s)_s.classList.add('hidden');}
   var el=document.getElementById('gg-'+n);
   if(el){el.classList.remove('hidden');renderPB('ggpb-'+n,n,ggTotalSteps);}
   document.getElementById('goal-scroll').scrollTo({top:0,behavior:'smooth'});
@@ -1381,14 +1372,6 @@ async function sendChat(){
     addAiMsg('网络连接出错，请检查网络后再试。');
   }
   document.getElementById('send-btn').disabled=false;
-}
-</script>
-
-<script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load', function(){
-    navigator.serviceWorker.register('/sw.js').catch(function(){});
-  });
 }
 </script>
 </body>
