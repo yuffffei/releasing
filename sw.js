@@ -1,11 +1,10 @@
-const CACHE = 'release-v1';
+const CACHE = 'release-v2';
 const OFFLINE_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png',
-  'https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap'
+  './',
+  './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
 ];
 
 self.addEventListener('install', function(e){
@@ -25,8 +24,9 @@ self.addEventListener('activate', function(e){
 });
 
 self.addEventListener('fetch', function(e){
-  // Don't intercept Anthropic API calls
   if(e.request.url.includes('api.anthropic.com')) return;
+  if(e.request.url.includes('fonts.googleapis.com')) return;
+  if(e.request.url.includes('fonts.gstatic.com')) return;
   e.respondWith(
     caches.match(e.request).then(function(cached){
       if(cached) return cached;
@@ -36,7 +36,7 @@ self.addEventListener('fetch', function(e){
         caches.open(CACHE).then(function(c){ c.put(e.request, clone); });
         return resp;
       }).catch(function(){
-        return caches.match('/index.html');
+        return caches.match('./index.html');
       });
     })
   );
