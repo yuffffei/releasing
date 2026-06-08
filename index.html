@@ -1104,14 +1104,15 @@ function stopSound(){
 function startOceanSound(){
   if(!audioCtx) return;
   stopSound();
+  var sr = audioCtx.sampleRate;
   var master = audioCtx.createGain();
   master.gain.setValueAtTime(0, audioCtx.currentTime);
-  master.gain.linearRampToValueAtTime(0.18, audioCtx.currentTime+2);
+  master.gain.linearRampToValueAtTime(0.10, audioCtx.currentTime+2.5);
   master.connect(audioCtx.destination);
 
-  // Pink-ish noise buffer (2s looping) — base for waves
-  function makeNoise(dur){
-    var buf = audioCtx.createBuffer(1, audioCtx.sampleRate*dur, audioCtx.sampleRate);
+  // Pink noise generator
+  function makePink(dur){
+    var buf = audioCtx.createBuffer(1, sr*dur, sr);
     var d = buf.getChannelData(0);
     var b0=0,b1=0,b2=0,b3=0,b4=0,b5=0;
     for(var i=0;i<d.length;i++){
@@ -1124,119 +1125,138 @@ function startOceanSound(){
     return buf;
   }
 
-  // Main noise source
-  var src = audioCtx.createBufferSource();
-  src.buffer = makeNoise(3);
-  src.loop = true;
+  // Layer 1: deep thud of wave hitting shore — very low BP
+  var thud = audioCtx.createBufferSource();
+  thud.buffer = makePink(4); thud.loop=true;
+  var thudBP = audioCtx.createBiquadFilter();
+  thudBP.type='lowpass'; thudBP.frequency.value=120; thudBP.Q.value=2.0;
+  var thudGain = audioCtx.createGain();
+  thudGain.gain.value = 1.2;
+  thud.connect(thudBP); thudBP.connect(thudGain); thudGain.connect(master);
 
-  // Low pass — cuts high freq, keeps rumble
-  var lp = audioCtx.createBiquadFilter();
-  lp.type='lowpass'; lp.frequency.value=420; lp.Q.value=0.8;
+  // Layer 2: mid surge — water rushing up the beach
+  var surge = audioCtx.createBufferSource();
+  surge.buffer = makePink(3); surge.loop=true;
+  var surgeBP = audioCtx.createBiquadFilter();
+  surgeBP.type='bandpass'; surgeBP.frequency.value=380; surgeBP.Q.value=0.6;
+  var surgeGain = audioCtx.createGain();
+  surgeGain.gain.value = 0.7;
+  surge.connect(surgeBP); surgeBP.connect(surgeGain); surgeGain.connect(master);
 
-  // LFO for wave swell rhythm (~8s cycle)
-  var lfo = audioCtx.createOscillator();
-  lfo.frequency.value = 0.12;
-  var lfoGain = audioCtx.createGain();
-  lfoGain.gain.value = 0.12;
-  var waveGain = audioCtx.createGain();
-  waveGain.gain.value = 0.8;
-  lfo.connect(lfoGain);
-  lfoGain.connect(waveGain.gain);
-
-  src.connect(lp);
-  lp.connect(waveGain);
-  waveGain.connect(master);
-
-  // Second noise layer — higher, for foam/hiss
-  var src2 = audioCtx.createBufferSource();
-  src2.buffer = makeNoise(2);
-  src2.loop = true;
-  var hp = audioCtx.createBiquadFilter();
-  hp.type='bandpass'; hp.frequency.value=1200; hp.Q.value=0.5;
+  // Layer 3: hiss of receding water over pebbles
+  var hiss = audioCtx.createBufferSource();
+  hiss.buffer = makePink(2); hiss.loop=true;
+  var hissBP = audioCtx.createBiquadFilter();
+  hissBP.type='bandpass'; hissBP.frequency.value=2200; hissBP.Q.value=0.4;
   var hissGain = audioCtx.createGain();
-  hissGain.gain.value = 0.04;
+  hissGain.gain.value = 0.18;
+  hiss.connect(hissBP); hissBP.connect(hissGain); hissGain.connect(master);
 
-  // LFO2 slightly offset phase
-  var lfo2 = audioCtx.createOscillator();
-  lfo2.frequency.value = 0.09;
-  var lfoGain2 = audioCtx.createGain();
-  lfoGain2.gain.value = 0.03;
-  lfo2.connect(lfoGain2);
-  lfoGain2.connect(hissGain.gain);
+  // Swell LFO (~9s cycle) — drives all three layers in sequence
+  // thud peaks first, surge follows, hiss trails
+  var swellLFO = audioCtx.createOscillator();
+  swellLFO.type='sine'; swellLFO.frequency.value=0.11;
+  var swellMod = audioCtx.createGain(); swellMod.gain.value=0.5;
+  swellLFO.connect(swellMod); swellMod.connect(thudGain.gain);
 
-  src2.connect(hp);
-  hp.connect(hissGain);
-  hissGain.connect(master);
+  var swellLFO2 = audioCtx.createOscillator();
+  swellLFO2.type='sine'; swellLFO2.frequency.value=0.11;
+  var swellMod2 = audioCtx.createGain(); swellMod2.gain.value=0.35;
+  swellLFO2.connect(swellMod2); swellMod2.connect(surgeGain.gain);
 
-  src.start(); src2.start(); lfo.start(); lfo2.start();
-  soundNodes=[src,src2,lfo,lfo2,master,lfoGain,lfoGain2,waveGain,hissGain,lp,hp];
+  var swellLFO3 = audioCtx.createOscillator();
+  swellLFO3.type='sine'; swellLFO3.frequency.value=0.095;
+  var swellMod3 = audioCtx.createGain(); swellMod3.gain.value=0.12;
+  swellLFO3.connect(swellMod3); swellMod3.connect(hissGain.gain);
+
+  thud.start(); surge.start(); hiss.start();
+  swellLFO.start(); swellLFO2.start(); swellLFO3.start();
+  soundNodes=[thud,surge,hiss,swellLFO,swellLFO2,swellLFO3,
+              master,thudGain,surgeGain,hissGain,
+              thudBP,surgeBP,hissBP,swellMod,swellMod2,swellMod3];
 }
 
 function startFireSound(){
   if(!audioCtx) return;
   stopSound();
+  var sr = audioCtx.sampleRate;
+
+  // Warmth shelf filter on output
+  var shelf = audioCtx.createBiquadFilter();
+  shelf.type='highshelf'; shelf.frequency.value=2000; shelf.gain.value=-18;
+  shelf.connect(audioCtx.destination);
+
   var master = audioCtx.createGain();
   master.gain.setValueAtTime(0, audioCtx.currentTime);
-  master.gain.linearRampToValueAtTime(0.15, audioCtx.currentTime+1.5);
-  master.connect(audioCtx.destination);
+  master.gain.linearRampToValueAtTime(0.22, audioCtx.currentTime+1.8);
+  master.connect(shelf);
 
-  function makeNoise(dur){
-    var buf = audioCtx.createBuffer(1, audioCtx.sampleRate*dur, audioCtx.sampleRate);
+  function makeWhite(dur){
+    var buf = audioCtx.createBuffer(1, sr*dur, sr);
     var d = buf.getChannelData(0);
     for(var i=0;i<d.length;i++) d[i]=Math.random()*2-1;
     return buf;
   }
 
-  // Base crackle — raw white noise through bandpass
-  var src = audioCtx.createBufferSource();
-  src.buffer = makeNoise(2);
-  src.loop = true;
-  var bp = audioCtx.createBiquadFilter();
-  bp.type='bandpass'; bp.frequency.value=800; bp.Q.value=0.4;
-  var baseGain = audioCtx.createGain();
-  baseGain.gain.value = 0.3;
-  src.connect(bp); bp.connect(baseGain); baseGain.connect(master);
+  // Layer 1: deep log burn — very low freq rumble
+  var log = audioCtx.createBufferSource();
+  log.buffer = makeWhite(3); log.loop=true;
+  var logLP = audioCtx.createBiquadFilter();
+  logLP.type='lowpass'; logLP.frequency.value=90; logLP.Q.value=3.0;
+  var logGain = audioCtx.createGain();
+  logGain.gain.value = 1.8;
+  log.connect(logLP); logLP.connect(logGain); logGain.connect(master);
 
-  // Low rumble
-  var src2 = audioCtx.createBufferSource();
-  src2.buffer = makeNoise(3);
-  src2.loop = true;
-  var lp = audioCtx.createBiquadFilter();
-  lp.type='lowpass'; lp.frequency.value=180; lp.Q.value=1.2;
-  var rumbleGain = audioCtx.createGain();
-  rumbleGain.gain.value = 0.55;
-  src2.connect(lp); lp.connect(rumbleGain); rumbleGain.connect(master);
+  // Layer 2: mid crackle — wood snap characteristic freq
+  var crackle = audioCtx.createBufferSource();
+  crackle.buffer = makeWhite(1.5); crackle.loop=true;
+  var crackBP = audioCtx.createBiquadFilter();
+  crackBP.type='bandpass'; crackBP.frequency.value=1100; crackBP.Q.value=1.8;
+  var crackGain = audioCtx.createGain();
+  crackGain.gain.value = 0.55;
+  crackle.connect(crackBP); crackBP.connect(crackGain); crackGain.connect(master);
 
-  // Slow flutter LFO — fire breathes
-  var lfo = audioCtx.createOscillator();
-  lfo.type='sine'; lfo.frequency.value=0.22;
-  var lfoG = audioCtx.createGain();
-  lfoG.gain.value=0.08;
-  lfo.connect(lfoG); lfoG.connect(baseGain.gain);
+  // Layer 3: high snap — sharp wood pop
+  var snap = audioCtx.createBufferSource();
+  snap.buffer = makeWhite(1); snap.loop=true;
+  var snapBP = audioCtx.createBiquadFilter();
+  snapBP.type='bandpass'; snapBP.frequency.value=3200; snapBP.Q.value=4.0;
+  var snapGain = audioCtx.createGain();
+  snapGain.gain.value = 0.25;
+  snap.connect(snapBP); snapBP.connect(snapGain); snapGain.connect(master);
 
-  // Crackle pops — random gain modulation
-  var lfo2 = audioCtx.createOscillator();
-  lfo2.type='sawtooth'; lfo2.frequency.value=3.7;
-  var lfoG2 = audioCtx.createGain();
-  lfoG2.gain.value=0.06;
-  lfo2.connect(lfoG2); lfoG2.connect(rumbleGain.gain);
+  // Irregular crackle LFO — fast random-feeling flutter
+  var crackLFO = audioCtx.createOscillator();
+  crackLFO.type='sawtooth'; crackLFO.frequency.value=5.3;
+  var crackMod = audioCtx.createGain(); crackMod.gain.value=0.3;
+  crackLFO.connect(crackMod); crackMod.connect(crackGain.gain);
 
-  // Warmth — subtle high shelf cut
-  var shelf = audioCtx.createBiquadFilter();
-  shelf.type='highshelf'; shelf.frequency.value=3000; shelf.gain.value=-12;
-  master.disconnect();
-  master.connect(shelf); shelf.connect(audioCtx.destination);
+  // Pop LFO — occasional sharp pops
+  var popLFO = audioCtx.createOscillator();
+  popLFO.type='sawtooth'; popLFO.frequency.value=2.1;
+  var popMod = audioCtx.createGain(); popMod.gain.value=0.2;
+  popLFO.connect(popMod); popMod.connect(snapGain.gain);
 
-  src.start(); src2.start(); lfo.start(); lfo2.start();
-  soundNodes=[src,src2,lfo,lfo2,master,baseGain,rumbleGain,lfoG,lfoG2,bp,lp,shelf];
+  // Slow breathe — fire intensity rises and falls
+  var breathLFO = audioCtx.createOscillator();
+  breathLFO.type='sine'; breathLFO.frequency.value=0.18;
+  var breathMod = audioCtx.createGain(); breathMod.gain.value=0.4;
+  breathLFO.connect(breathMod); breathMod.connect(logGain.gain);
+
+  log.start(); crackle.start(); snap.start();
+  crackLFO.start(); popLFO.start(); breathLFO.start();
+  soundNodes=[log,crackle,snap,crackLFO,popLFO,breathLFO,
+              master,logGain,crackGain,snapGain,
+              logLP,crackBP,snapBP,crackMod,popMod,breathMod,shelf];
 }
 
 function startAmbientSound(){
   if(!soundOn) return;
   initAudio();
   if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
-  if(currentTheme==='ocean') startOceanSound();
-  else startFireSound();
+  // ocean theme = ocean waves, night theme = fireplace
+  if(currentTheme==='night') startFireSound();
+  else startOceanSound();
 }
 
 function toggleSound(){
